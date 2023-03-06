@@ -54,7 +54,6 @@ impl Signature {
 }
 
 /// A basic block.
-/// Basic blocks can only have jump statements or labels at the start or end of them
 #[derive(Debug, Clone)]
 pub struct Block {
     pub(crate) id: usize,
