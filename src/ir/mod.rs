@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 pub use instruction::{Arg, Instruction, InstructionCode};
-pub use types::{Type, Literal, Variable};
+pub use types::{Literal, Type, Variable};
 
 use self::types::{Function, Signature};
 
@@ -20,17 +20,19 @@ impl IRBuilder {
     pub fn new() -> Self {
         IRBuilder {
             instructions: Vec::new(),
-            funcs: Vec::new()
+            funcs: Vec::new(),
         }
     }
+
     pub fn create_function(&mut self, sig: Signature) -> Function {
         let f = Function {
-            id: self.funcs.len() - 1,
+            id: self.funcs.len(),
             sig,
         };
         self.funcs.push(f.clone());
         f
     }
+
     /// Push an instruction into the IR
     pub fn push<const N: usize>(&mut self, code: InstructionCode, args: [Arg; N]) -> Variable {
         match N {
