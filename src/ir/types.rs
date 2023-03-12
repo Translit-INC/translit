@@ -1,5 +1,3 @@
-use std::ops::Range;
-
 /// Type of a literal or variable
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Type {
@@ -42,7 +40,7 @@ impl Signature {
     pub fn new(params: &[Type], returns: Type) -> Self {
         Self {
             params: params.to_vec(),
-            returns: returns,
+            returns,
         }
     }
 }

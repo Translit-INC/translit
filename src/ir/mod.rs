@@ -1,5 +1,3 @@
-use std::ops::Range;
-
 pub use instruction::{Arg, Instruction, InstructionCode};
 pub use types::{Literal, Type, Variable};
 
