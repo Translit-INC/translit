@@ -1,4 +1,3 @@
-use super::error::{TranslitError, TranslitResult};
 pub use instruction::{Arg, Instruction, InstructionCode};
 pub use types::{Block, BlockID, Function, FunctionID, Literal, Signature, Type, Variable};
 
@@ -10,16 +9,20 @@ pub use builder::IRBuilder;
 #[cfg(test)]
 mod tests {
 
-    use super::{Function, IRBuilder, InstructionCode, Signature};
+    use super::*;
 
     #[test]
     /// Starting a function test
-    fn start_function() {
+    fn make_function() {
         let mut builder = IRBuilder::new();
-        let sig = Signature::new(&[], super::Type::NONE);
-        match builder.make_function(&sig, || {}) {
-            Ok(_) => {}
-            Err(e) => println!("{}", e),
-        }
+        let sig = Signature::new(&[], Type::NONE);
+        let _f = builder.start_function(&sig).unwrap();
+        builder
+            .push(
+                InstructionCode::ADD,
+                [Literal::int16(12).into(), Literal::int16(43).into()],
+            )
+            .unwrap();
+        builder.end_function().unwrap();
     }
 }

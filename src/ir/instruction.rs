@@ -27,6 +27,30 @@ pub enum Arg {
     NONE,
 }
 
+impl From<Variable> for Arg {
+    fn from(value: Variable) -> Self {
+        Arg::Var(value)
+    }
+}
+
+impl From<Literal> for Arg {
+    fn from(value: Literal) -> Self {
+        Arg::Literal(value)
+    }
+}
+
+impl From<BlockID> for Arg {
+    fn from(value: BlockID) -> Self {
+        Arg::Block(value)
+    }
+}
+
+impl From<FunctionID> for Arg {
+    fn from(value: FunctionID) -> Self {
+        Arg::Function(value)
+    }
+}
+
 /// Instruction Code
 #[repr(u64)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

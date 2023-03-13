@@ -18,6 +18,24 @@ pub enum Type {
 #[derive(Debug, Clone, Copy)]
 pub struct Literal(pub(crate) Type, pub(crate) u64); // Actual value
 
+impl Literal {
+    pub fn int8(n: i8) -> Literal {
+        Literal(Type::I8, n as _)
+    }
+
+    pub fn int16(n: i16) -> Literal {
+        Literal(Type::I8, n as _)
+    }
+
+    pub fn int32(n: i32) -> Literal {
+        Literal(Type::I8, n as _)
+    }
+
+    pub fn int64(n: i64) -> Literal {
+        Literal(Type::I8, n as _)
+    }
+}
+
 /// A variable
 #[derive(Debug, Clone, Copy)]
 pub struct Variable(pub(crate) usize); // reference to value stored in IRBuilder

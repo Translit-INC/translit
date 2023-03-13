@@ -1,4 +1,7 @@
-use super::*;
+use super::instruction::{Arg, Instruction, InstructionCode};
+use super::types::{Block, BlockID, Function, FunctionID, Signature, Variable};
+use crate::error::{TranslitError, TranslitResult};
+
 /// IR Builder
 #[derive(Debug, Clone, Default)]
 pub struct IRBuilder {
@@ -17,20 +20,6 @@ impl IRBuilder {
         }
     }
 
-
-    /// Make a Function  with a better syntax
-    pub fn make_function(
-        &mut self,
-        sig: &Signature,
-        instructions: fn(),
-    ) -> TranslitResult<FunctionID> {
-        let f = self.start_function(sig)?;
-        instructions();
-        self.end_function()?;
-        return TranslitResult::Ok(f);
-    }
-
-    
     /// Start a function.
     /// Every instruction will be placed inside this function till you call `end_function`.
     /// Returns an error if a function is already going on
