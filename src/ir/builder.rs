@@ -19,7 +19,16 @@ impl IRBuilder {
             blocks: Vec::new(),
         }
     }
-
+    /// Make a function with better syntax
+    pub fn make_function<F>(&mut self, sig: &Signature, instr: F) -> TranslitResult<FunctionID>
+    where
+        F: FnOnce(&mut IRBuilder) -> TranslitResult<()>,
+    {
+        let f = self.start_function(&sig)?;
+        instr(self)?;
+        self.end_function()?;
+        return TranslitResult::Ok(f)
+    }
     /// Start a function.
     /// Every instruction will be placed inside this function till you call `end_function`.
     /// Returns an error if a function is already going on
