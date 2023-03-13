@@ -9,7 +9,7 @@ pub struct IRBuilder {
     pub(crate) functions: Vec<Function>,
     pub(crate) blocks: Vec<Block>,
 
-    pub(crate) generated_assembly: Option<String>
+    pub(crate) generated_assembly: Option<String>,
 }
 
 impl IRBuilder {
@@ -19,7 +19,7 @@ impl IRBuilder {
             instructions: Vec::new(),
             functions: Vec::new(),
             blocks: Vec::new(),
-            generated_assembly: None
+            generated_assembly: None,
         }
     }
 
@@ -43,7 +43,6 @@ impl IRBuilder {
         };
 
         *end = Some(self.instructions.len()); // then END instruction we just pushed
-
         self.push(InstructionCode::END, []).unwrap();
         Ok(())
     }
@@ -62,7 +61,37 @@ impl IRBuilder {
             Err(TranslitError::BlockEndError)
         }
     }
-
+    /// Verify the instruction
+    pub fn verify(&self, instr: &Instruction) -> TranslitResult<()> {
+        let mut instr_args = instr.1.to_vec();
+        instr_args.retain(|&x| x != Arg::NONE);
+        let params_err = |length: usize| {
+            if instr_args.len() != length {
+                return TranslitResult::Err(TranslitError::InstrParamLenError);
+            }
+            return TranslitResult::Ok(());
+        };
+        match num::FromPrimitive::from_u64(instr.0).unwrap() {
+            InstructionCode::ADD
+            | InstructionCode::SUB
+            | InstructionCode::MUL
+            | InstructionCode::DIV
+            | InstructionCode::MOD => params_err(2),
+            InstructionCode::CMP => params_err(2),
+            InstructionCode::AND => params_err(2),
+            InstructionCode::OR => params_err(2),
+            InstructionCode::NOT => params_err(1),
+            InstructionCode::EQ => params_err(2),
+            InstructionCode::CMPEQ => params_err(2),
+            InstructionCode::RET => {
+                if let Some(Function { end: Some(_), .. }) = self.functions.last() {
+                    return Err(TranslitError::RetOutsideFuncError);
+                }
+                params_err(1)
+            }
+            InstructionCode::END => params_err(0),
+        }
+    }
     /// End the ongoing basic block. Returns an error if there is no basic block ongoing
     pub fn end_block(&mut self) -> TranslitResult<()> {
         let Some(Block { end: end @ None, .. }) = self.blocks.last_mut() else {
@@ -79,22 +108,27 @@ impl IRBuilder {
         code: InstructionCode,
         args: [Arg; N],
     ) -> TranslitResult<Variable> {
-        if let (Some(Function { end: Some(_), .. }), InstructionCode::RET) =
-            (self.functions.last(), code)
-        {
-            return Err(TranslitError::RetOutsideFuncError);
-        }
         match args.as_slice() {
-            [] => self
-                .instructions
-                .push(Instruction::new(code, [Arg::NONE; 3])),
-            &[a] => self
-                .instructions
-                .push(Instruction::new(code, [a, Arg::NONE, Arg::NONE])),
-            &[a, b] => self
-                .instructions
-                .push(Instruction::new(code, [a, b, Arg::NONE])),
-            &[a, b, c] => self.instructions.push(Instruction::new(code, [a, b, c])),
+            [] => {
+                let instr = Instruction::new(code, [Arg::NONE; 3]);
+                self.verify(&instr)?;
+                self.instructions.push(instr)
+            }
+            &[a] => {
+                let instr = Instruction::new(code, [a, Arg::NONE, Arg::NONE]);
+                self.verify(&instr)?;
+                self.instructions.push(instr)
+            }
+            &[a, b] => {
+                let instr = Instruction::new(code, [a, b, Arg::NONE]);
+                self.verify(&instr)?;
+                self.instructions.push(instr)
+            }
+            &[a, b, c] => {
+                let instr = Instruction::new(code, [a, b, c]);
+                self.verify(&instr)?;
+                self.instructions.push(instr)
+            }
             _ => panic!("Too many arguments"),
         };
 

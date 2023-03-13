@@ -15,7 +15,7 @@ pub enum Type {
 }
 
 /// A literal value
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Literal(pub(crate) Type, pub(crate) u64); // Actual value
 
 impl Literal {
@@ -37,7 +37,7 @@ impl Literal {
 }
 
 /// A variable
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Variable(pub(crate) usize); // reference to value stored in IRBuilder
 
 #[derive(Debug, Clone)]

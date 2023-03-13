@@ -1,18 +1,20 @@
+
 use super::types::{BlockID, FunctionID, Literal, Variable};
 
 /// An instruction in the IR
 #[derive(Debug, Clone)]
-pub struct Instruction(u64, [Arg; 3]);
+pub struct Instruction(pub(crate) u64, pub(crate) [Arg; 3]);
 
 impl Instruction {
     /// Create a new instruction
     pub fn new(code: InstructionCode, args: [Arg; 3]) -> Instruction {
         Instruction(code as u64, args)
     }
+   
 }
 
 /// Argument passed to an instruction
-#[derive(Debug, Clone, Default, Copy)]
+#[derive(Debug, Clone, Default, Copy, PartialEq)]
 pub enum Arg {
     /// Variable
     Var(Variable),
@@ -53,6 +55,8 @@ impl From<FunctionID> for Arg {
 
 /// Instruction Code
 #[repr(u64)]
+
+#[derive(FromPrimitive)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InstructionCode {
     /// a + b
