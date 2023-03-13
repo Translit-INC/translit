@@ -26,19 +26,16 @@ pub struct Variable(pub(crate) usize); // reference to value stored in IRBuilder
 /// a function
 pub struct Function {
     pub(crate) id: usize,
+    /// this hold the index of the first instruction of the function
+    pub(crate) start: usize,
+    /// this hold the index of the last instruction of the function
+    pub(crate) end: Option<usize>,
     pub(crate) sig: Signature,
-    pub(crate) end: Option<usize> // this hold the index of the last instruction of the function
 }
 
-impl Function {
-    pub(crate) fn new(id: usize, sig: Signature) -> Self {
-        Function {
-            id,
-            sig,
-            end: None
-        }
-    }
-}
+/// Reference to a function
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FunctionID(pub(crate) usize);
 
 #[derive(Debug, Clone)]
 /// Function Signature
@@ -55,3 +52,18 @@ impl Signature {
         }
     }
 }
+
+/// A basic block.
+/// Basic blocks can only have jump statements or labels at the start or end of them
+#[derive(Debug, Clone)]
+pub struct Block {
+    pub(crate) id: usize,
+    /// this hold the index of the first instruction of the function
+    pub(crate) start: usize,
+    /// this hold the index of the last instruction of the function
+    pub(crate) end: Option<usize>,
+}
+
+/// Reference to a block
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BlockID(pub(crate) usize);

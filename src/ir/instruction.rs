@@ -1,4 +1,4 @@
-use super::types::{Literal, Variable};
+use super::types::{BlockID, FunctionID, Literal, Variable};
 
 /// An instruction in the IR
 #[derive(Debug, Clone)]
@@ -18,6 +18,10 @@ pub enum Arg {
     Var(Variable),
     /// Literal
     Literal(Literal),
+    /// Function
+    Function(FunctionID),
+    /// Basic block
+    Block(BlockID),
     /// None
     #[default]
     NONE,
@@ -49,6 +53,8 @@ pub enum InstructionCode {
     CMPEQ,
     /// a > b
     CMP,
+    /// return from function
+    RET,
 
     /// end instruction for blocks
     END,

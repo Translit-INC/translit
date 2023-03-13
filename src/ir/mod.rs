@@ -1,17 +1,16 @@
+use super::error::{TranslitError, TranslitResult};
 pub use instruction::{Arg, Instruction, InstructionCode};
-pub use types::{Literal, Type, Variable};
-
-use self::{types::{Function, Signature}, error_type::{FunctionError, TranslitError}};
+pub use types::{Block, BlockID, Function, FunctionID, Literal, Signature, Type, Variable};
 
 pub mod instruction;
 pub mod types;
-pub mod error_type;
 
 /// IR Builder
 #[derive(Debug, Clone, Default)]
 pub struct IRBuilder {
     instructions: Vec<Instruction>,
-    funcs: Vec<Function>,
+    functions: Vec<Function>,
+    blocks: Vec<Block>,
 }
 
 impl IRBuilder {
@@ -19,56 +18,92 @@ impl IRBuilder {
     pub fn new() -> Self {
         IRBuilder {
             instructions: Vec::new(),
-            funcs: Vec::new(),
+            functions: Vec::new(),
+            blocks: Vec::new(),
         }
     }
 
-    /// Start a function (every instruction will be placed inside this function till you call end_function)
-    pub fn start_function(&mut self, sig: Signature) -> Result<Function, impl TranslitError> {
-        let lst_fn = self.funcs.last();
-
-        if self.funcs.len() != 0 && lst_fn.unwrap().end.is_none() {
-            return Err(FunctionError::new("Cannot start another function", "A function is already ongoing"));
+    /// Start a function.
+    /// Every instruction will be placed inside this function till you call `end_function`.
+    /// Returns an error if a function is already going on
+    pub fn start_function(&mut self, sig: Signature) -> TranslitResult<FunctionID> {
+        if let Some(Function { end: Some(_), .. }) = self.functions.last() {
+            let f = Function {
+                id: self.functions.len(),
+                start: self.instructions.len(),
+                end: None,
+                sig,
+            };
+            self.functions.push(f);
+            Ok(FunctionID(self.functions.len() - 1))
+        } else {
+            Err(TranslitError::FunctionEndError)
         }
-
-        let f = Function::new(self.instructions.len(), sig);
-        self.funcs.push(f.clone());
-
-        Ok(f)
     }
 
-    pub fn end_function(&mut self, func: &mut Function) -> Result<(), impl TranslitError> {
-        let lst_fn = self.funcs.last();
+    /// End the ongoing function. Returns an error if there is no function ongoing
+    pub fn end_function(&mut self) -> TranslitResult<()> {
+        let Some(Function { end: end @ None, .. }) = self.functions.last_mut() else {
+            return Err(TranslitError::FunctionEndError);
+        };
 
-        if self.funcs.len() != 0 && lst_fn.unwrap().end.is_some() {
-            return Err(FunctionError::new("Cannot end a function", "This function is already ended"));
-        }
+        *end = Some(self.instructions.len()); // then END instruction we just pushed
 
-        self.instructions.push(Instruction::new(InstructionCode::END, [Arg::NONE, Arg::NONE, Arg::NONE]));
-
-        func.end = Some(self.instructions.len() - 1); // then END instruction we just pushed
-
+        self.push(InstructionCode::END, []).unwrap();
         Ok(())
     }
 
-    /// Push an instruction into the IR
-    pub fn push<const N: usize>(&mut self, code: InstructionCode, args: [Arg; N]) -> Variable {
-        match N {
-            0 => self
+    /// Start a basic block.
+    /// Returns an error if another basic block is still ongoing
+    pub fn start_block(&mut self) -> TranslitResult<BlockID> {
+        if let Some(Block { end: Some(_), .. }) = self.blocks.last() {
+            let block = Block {
+                id: self.blocks.len(),
+                start: self.instructions.len(),
+                end: None,
+            };
+            self.blocks.push(block);
+            Ok(BlockID(self.blocks.len() - 1))
+        } else {
+            Err(TranslitError::BlockEndError)
+        }
+    }
+
+    /// End the ongoing basic block. Returns an error if there is no basic block ongoing
+    pub fn end_block(&mut self) -> TranslitResult<()> {
+        let Some(Block { end: end @ None, .. }) = self.blocks.last_mut() else {
+            return Err(TranslitError::BlockEndError);
+        };
+
+        *end = Some(self.instructions.len());
+        Ok(())
+    }
+
+    /// Push an instruction into the IR. Returns an error if a RET instruction is passed outside a function.
+    pub fn push<const N: usize>(
+        &mut self,
+        code: InstructionCode,
+        args: [Arg; N],
+    ) -> TranslitResult<Variable> {
+        if let (Some(Function { end: Some(_), .. }), InstructionCode::RET) =
+            (self.functions.last(), code)
+        {
+            return Err(TranslitError::RetOutsideFuncError);
+        }
+        match args.as_slice() {
+            [] => self
                 .instructions
                 .push(Instruction::new(code, [Arg::NONE; 3])),
-            1 => self
+            &[a] => self
                 .instructions
-                .push(Instruction::new(code, [args[0], Arg::NONE, Arg::NONE])),
-            2 => self
+                .push(Instruction::new(code, [a, Arg::NONE, Arg::NONE])),
+            &[a, b] => self
                 .instructions
-                .push(Instruction::new(code, [args[0], args[1], Arg::NONE])),
-            3 => self.instructions.push(Instruction::new(code, unsafe {
-                std::mem::transmute_copy(&args)
-            })),
+                .push(Instruction::new(code, [a, b, Arg::NONE])),
+            &[a, b, c] => self.instructions.push(Instruction::new(code, [a, b, c])),
             _ => panic!("Too many arguments"),
         };
 
-        Variable(self.instructions.len() - 1)
+        Ok(Variable(self.instructions.len() - 1))
     }
 }
