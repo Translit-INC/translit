@@ -27,6 +27,17 @@ pub struct Variable(pub(crate) usize); // reference to value stored in IRBuilder
 pub struct Function {
     pub(crate) id: usize,
     pub(crate) sig: Signature,
+    pub(crate) end: Option<usize> // this hold the index of the last instruction of the function
+}
+
+impl Function {
+    pub(crate) fn new(id: usize, sig: Signature) -> Self {
+        Function {
+            id,
+            sig,
+            end: None
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
