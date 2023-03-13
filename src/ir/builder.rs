@@ -5,9 +5,11 @@ use crate::error::{TranslitError, TranslitResult};
 /// IR Builder
 #[derive(Debug, Clone, Default)]
 pub struct IRBuilder {
-    instructions: Vec<Instruction>,
-    functions: Vec<Function>,
-    blocks: Vec<Block>,
+    pub(crate) instructions: Vec<Instruction>,
+    pub(crate) functions: Vec<Function>,
+    pub(crate) blocks: Vec<Block>,
+
+    pub(crate) generated_assembly: Option<String>
 }
 
 impl IRBuilder {
@@ -17,24 +19,15 @@ impl IRBuilder {
             instructions: Vec::new(),
             functions: Vec::new(),
             blocks: Vec::new(),
+            generated_assembly: None
         }
     }
-    /// Make a function with better syntax
-    pub fn make_function<F>(&mut self, sig: &Signature, instr: F) -> TranslitResult<FunctionID>
-    where
-        F: FnOnce(&mut IRBuilder) -> TranslitResult<()>,
-    {
-        let f = self.start_function(&sig)?;
-        instr(self)?;
-        self.end_function()?;
-        return TranslitResult::Ok(f)
-    }
+
     /// Start a function.
-    /// Every instruction will be placed inside this function till you call `end_function`.
+    /// Every instruction after this function call will be considered as the part of the function until end_function is called.
     /// Returns an error if a function is already going on
     pub fn start_function(&mut self, sig: &Signature) -> TranslitResult<FunctionID> {
         let f = Function {
-            id: self.functions.len(),
             start: self.instructions.len(),
             end: None,
             sig: sig.to_owned(),
@@ -60,7 +53,6 @@ impl IRBuilder {
     pub fn start_block(&mut self) -> TranslitResult<BlockID> {
         if let Some(Block { end: Some(_), .. }) = self.blocks.last() {
             let block = Block {
-                id: self.blocks.len(),
                 start: self.instructions.len(),
                 end: None,
             };
