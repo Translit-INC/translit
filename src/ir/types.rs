@@ -43,10 +43,9 @@ pub struct Variable(pub(crate) usize); // reference to value stored in IRBuilder
 #[derive(Debug, Clone)]
 /// a function
 pub struct Function {
-    pub(crate) id: usize,
-    /// this hold the index of the first instruction of the function
+    /// this will hold the index of the first instruction of the function
     pub(crate) start: usize,
-    /// this hold the index of the last instruction of the function
+    /// this will eventually hold the index of the last instruction of the function
     pub(crate) end: Option<usize>,
     pub(crate) sig: Signature,
 }
@@ -74,7 +73,6 @@ impl Signature {
 /// A basic block.
 #[derive(Debug, Clone)]
 pub struct Block {
-    pub(crate) id: usize,
     /// this hold the index of the first instruction of the function
     pub(crate) start: usize,
     /// this hold the index of the last instruction of the function
