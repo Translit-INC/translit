@@ -49,4 +49,7 @@ pub enum InstructionCode {
     CMPEQ,
     /// a > b
     CMP,
+
+    /// end instruction for blocks
+    END,
 }
