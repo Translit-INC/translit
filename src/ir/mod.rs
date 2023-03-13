@@ -27,7 +27,7 @@ impl IRBuilder {
     /// Every instruction will be placed inside this function till you call `end_function`.
     /// Returns an error if a function is already going on
     pub fn start_function(&mut self, sig: Signature) -> TranslitResult<FunctionID> {
-        if let Some(Function { end: Some(_), .. }) = self.functions.last() {
+        if let Some(Function { end: Some(_), .. }) | None = self.functions.last() {
             let f = Function {
                 id: self.functions.len(),
                 start: self.instructions.len(),
@@ -37,7 +37,7 @@ impl IRBuilder {
             self.functions.push(f);
             Ok(FunctionID(self.functions.len() - 1))
         } else {
-            Err(TranslitError::FunctionEndError)
+            Err(TranslitError::FunctionStartError)
         }
     }
 
@@ -54,29 +54,24 @@ impl IRBuilder {
     }
 
     /// Start a basic block.
-    /// Returns an error if another basic block is still ongoing
-    pub fn start_block(&mut self) -> TranslitResult<BlockID> {
-        if let Some(Block { end: Some(_), .. }) = self.blocks.last() {
-            let block = Block {
-                id: self.blocks.len(),
-                start: self.instructions.len(),
-                end: None,
-            };
-            self.blocks.push(block);
-            Ok(BlockID(self.blocks.len() - 1))
+    pub fn start_block(&mut self) -> BlockID {
+        let block = Block {
+            id: self.blocks.len(),
+            start: self.instructions.len(),
+            end: None,
+        };
+        self.blocks.push(block);
+        BlockID(self.blocks.len() - 1)
+    }
+
+    /// End a basic block. Returns an error if the block is already closed
+    pub fn end_block(&mut self, block: BlockID) -> TranslitResult<()> {
+        if let Some(Block { end: end @ None, .. }) = self.blocks.get_mut(block.0) {
+            *end = Some(self.instructions.len());
+            Ok(())
         } else {
             Err(TranslitError::BlockEndError)
         }
-    }
-
-    /// End the ongoing basic block. Returns an error if there is no basic block ongoing
-    pub fn end_block(&mut self) -> TranslitResult<()> {
-        let Some(Block { end: end @ None, .. }) = self.blocks.last_mut() else {
-            return Err(TranslitError::BlockEndError);
-        };
-
-        *end = Some(self.instructions.len());
-        Ok(())
     }
 
     /// Push an instruction into the IR. Returns an error if a RET instruction is passed outside a function.
