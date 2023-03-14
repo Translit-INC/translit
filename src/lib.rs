@@ -25,15 +25,17 @@ mod tests {
 
         builder.push(
             InstructionCode::ADD,
-            &[Literal::int8(1).into(), Literal::int8(2).into()],
+            vec![Literal::int8(1).into(), Literal::int8(2).into()],
         )?;
         builder.push(
             InstructionCode::SUB,
-            &[Literal::int8(3).into(), Literal::int8(1).into()],
+            vec![Literal::int8(3).into(), Literal::int8(1).into()],
         )?;
 
         builder.end_function()?;
-        generate_assembly(Architecture::x86_64, builder.build()?)?;
+        let ir = builder.build()?;
+        ir.print();
+        generate_assembly(Architecture::x86_64, ir)?;
         Ok(())
     }
 }

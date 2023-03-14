@@ -4,17 +4,10 @@ use super::types::{FunctionID, Label, Literal, Variable};
 
 /// An instruction in the IR
 #[derive(Debug, Clone)]
-pub struct Instruction(pub(crate) u64, pub(crate) [Arg; 3]);
-
-impl Instruction {
-    /// Create a new instruction
-    pub fn new(code: InstructionCode, args: [Arg; 3]) -> Instruction {
-        Instruction(code as u64, args)
-    }
-}
+pub struct Instruction(pub(crate) u64, pub(crate) Vec<Arg>);
 
 /// Argument passed to an instruction
-#[derive(Debug, Clone, Default, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Arg {
     /// Variable
     Var(Variable),
@@ -24,9 +17,6 @@ pub enum Arg {
     Function(FunctionID),
     /// Basic block
     Label(Label),
-    /// None
-    #[default]
-    NONE,
 }
 
 impl From<Variable> for Arg {
@@ -81,7 +71,4 @@ pub enum InstructionCode {
     CMP,
     /// return from function
     RET,
-
-    /// end instruction for blocks
-    END,
 }

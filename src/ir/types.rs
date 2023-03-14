@@ -70,6 +70,6 @@ impl Signature {
     }
 }
 
-/// Reference to a block
+/// Label
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Label(pub(crate) usize);
+pub struct Label(pub(crate) usize); // Instruction at which it starts

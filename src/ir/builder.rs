@@ -53,8 +53,9 @@ impl IRBuilder {
             return Err(TranslitError::FunctionEndError);
         };
 
-        *end = Some(self.instructions.len()); // then END instruction we just pushed
-        self.push(InstructionCode::END, &[]).unwrap();
+        *end = Some(self.instructions.len());
+        self.instructions
+            .push(Instruction(InstructionCode::RET as u64, vec![]));
         Ok(())
     }
 
@@ -67,10 +68,8 @@ impl IRBuilder {
 
     /// Verify the instruction arguments
     pub fn verify(&self, instr: &Instruction) -> TranslitResult<()> {
-        let mut instr_args = instr.1.to_vec();
-        instr_args.retain(|&x| x != Arg::NONE);
         let params_err = |length: usize| {
-            (instr_args.len() == length)
+            (instr.1.len() == length)
                 .then_some(())
                 .ok_or(TranslitError::InstrParamLenError)
         };
@@ -93,23 +92,12 @@ impl IRBuilder {
                 }
                 params_err(1)
             }
-            InstructionCode::END => params_err(0),
         }
     }
 
     /// Push an instruction into the IR. Returns an error if a RET instruction is passed outside a function.
-    pub fn push(
-        &mut self,
-        code: InstructionCode,
-        args: &[Arg],
-    ) -> TranslitResult<Variable> {
-        let instr = match args {
-            [] => Instruction::new(code, [Arg::NONE; 3]),
-            &[a] => Instruction::new(code, [a, Arg::NONE, Arg::NONE]),
-            &[a, b] => Instruction::new(code, [a, b, Arg::NONE]),
-            &[a, b, c] => Instruction::new(code, [a, b, c]),
-            _ => panic!("Too many arguments"),
-        };
+    pub fn push(&mut self, code: InstructionCode, args: Vec<Arg>) -> TranslitResult<Variable> {
+        let instr = Instruction(code as u64, args);
         self.verify(&instr)?;
         self.instructions.push(instr);
 
