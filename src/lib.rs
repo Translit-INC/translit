@@ -25,11 +25,11 @@ mod tests {
 
         builder.push(
             InstructionCode::ADD,
-            [Literal::int8(1).into(), Literal::int8(2).into()],
+            &[Literal::int8(1).into(), Literal::int8(2).into()],
         )?;
         builder.push(
             InstructionCode::SUB,
-            [Literal::int8(3).into(), Literal::int8(1).into()],
+            &[Literal::int8(3).into(), Literal::int8(1).into()],
         )?;
 
         builder.end_function()?;

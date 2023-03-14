@@ -54,7 +54,7 @@ impl IRBuilder {
         };
 
         *end = Some(self.instructions.len()); // then END instruction we just pushed
-        self.push(InstructionCode::END, []).unwrap();
+        self.push(InstructionCode::END, &[]).unwrap();
         Ok(())
     }
 
@@ -98,12 +98,12 @@ impl IRBuilder {
     }
 
     /// Push an instruction into the IR. Returns an error if a RET instruction is passed outside a function.
-    pub fn push<const N: usize>(
+    pub fn push(
         &mut self,
         code: InstructionCode,
-        args: [Arg; N],
+        args: &[Arg],
     ) -> TranslitResult<Variable> {
-        let instr = match args.as_slice() {
+        let instr = match args {
             [] => Instruction::new(code, [Arg::NONE; 3]),
             &[a] => Instruction::new(code, [a, Arg::NONE, Arg::NONE]),
             &[a, b] => Instruction::new(code, [a, b, Arg::NONE]),
