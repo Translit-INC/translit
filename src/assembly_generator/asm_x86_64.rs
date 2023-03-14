@@ -1,24 +1,25 @@
-// TODO: everything
+#[path = "helper.rs"] mod helper;
 
-pub(crate) enum Architecture {
-    Nasm86_64
-}
+use crate::{ir::{IRBuilder, Instruction}, error::{TranslitError, TranslitResult}};
 
-pub(crate) struct AssemblyGenerator {
-    /// Data section of the assembly
-    data_asm: String,
+impl IRBuilder {
+    pub(crate) fn generate_assembly_nasm_x86_64(&mut self) -> TranslitResult<()> {
+        let mut builder = self.clone();
 
-    /// Main function of the assembly
-    start_asm: String,
+        let Some(main_func) = builder.functions.first() else {
+            return Err(TranslitError::AssemblyGenerationError("Main function not found".to_string()));
+        };
 
-    /// Functions will be stored just above the main function
-    function_asm: String,
+        let main_func_instructions = builder.instructions[main_func.start..=main_func.end.unwrap() - 1].to_vec();
 
-    architecture: Architecture
-}
+        let mut data_section = helper::init_data_section();
+        let mut text_section = helper::init_text_section();
+        let mut main_function = helper::init_main_function();
 
-impl AssemblyGenerator {
-    pub fn new(architecture: Architecture) -> Self {
-        AssemblyGenerator { data_asm: String::new(), start_asm: String::new(), function_asm: String::new(), architecture }
+        for inst in main_func_instructions {
+
+        }
+
+        Ok(())
     }
 }
