@@ -9,7 +9,8 @@ pub struct IRBuilder {
     pub(crate) functions: Vec<Function>,
     pub(crate) blocks: Vec<Block>,
 
-    pub(crate) generated_assembly: Option<String>,
+    // i'll see what to do with this     -- wizard
+    // pub(crate) generated_assembly: Option<String>,
 }
 
 impl IRBuilder {
@@ -19,7 +20,7 @@ impl IRBuilder {
             instructions: Vec::new(),
             functions: Vec::new(),
             blocks: Vec::new(),
-            generated_assembly: None,
+            // generated_assembly: None,
         }
     }
 
@@ -77,6 +78,7 @@ impl IRBuilder {
             | InstructionCode::MUL
             | InstructionCode::DIV
             | InstructionCode::MOD => params_err(2),
+
             InstructionCode::CMP => params_err(2),
             InstructionCode::AND => params_err(2),
             InstructionCode::OR => params_err(2),
