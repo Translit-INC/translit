@@ -11,6 +11,7 @@ pub enum TranslitError {
     BlockStartError,
     BlockEndError,
     InstrParamLenError,
+    AssemblyGenerationError(String),
 }
 
 impl fmt::Display for TranslitError {
@@ -21,7 +22,8 @@ impl fmt::Display for TranslitError {
             TranslitError::RetOutsideFuncError => write!(f, "Cannot return outside a function"),
             TranslitError::BlockStartError => write!(f, "Cannot start a new block"),
             TranslitError::BlockEndError => write!(f, "Cannot end the block"),
-            TranslitError::InstrParamLenError => write!(f, "The instruction parameter length are incorrect.")
+            TranslitError::InstrParamLenError => write!(f, "The instruction parameter length are incorrect."),
+            TranslitError::AssemblyGenerationError(info) => write!(f, "Error generating assembly: {}", info)
         }
     }
 }
