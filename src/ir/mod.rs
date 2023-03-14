@@ -3,5 +3,6 @@ pub use types::{Block, BlockID, Function, FunctionID, Literal, Signature, Type, 
 pub mod builder;
 pub mod instruction;
 pub mod types;
+pub mod generator;
 
 pub use builder::IRBuilder;
