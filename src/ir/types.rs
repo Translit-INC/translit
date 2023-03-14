@@ -39,7 +39,7 @@ impl Literal {
 
 /// A variable
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Variable(pub(crate) usize); // reference to value stored in IRBuilder
+pub struct Variable(pub(crate) usize); // value returned by instruction at that index
 
 #[derive(Debug, Clone)]
 /// a function

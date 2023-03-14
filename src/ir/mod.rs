@@ -1,4 +1,4 @@
-use instruction::{Arg, Instruction, InstructionCode};
+use instruction::{Arg, Instruction};
 use types::{Function, FunctionID, Label, Literal, Variable};
 
 pub mod builder;
@@ -30,7 +30,7 @@ impl IR {
             }
             println!(
                 "\tv{i} = {:?} {}",
-                <InstructionCode as num::FromPrimitive>::from_u64(instr.0).unwrap(),
+                instr.0,
                 instr.1.iter().fold(String::new(), |s, a| match a {
                     Arg::Label(Label(id)) => format!("{s}l{id} "),
                     Arg::Function(FunctionID(id)) => format!("{s}f{id} "),

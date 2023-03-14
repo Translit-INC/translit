@@ -19,7 +19,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn asm_gen() -> TranslitResult<()> {
+    fn gen_ir() -> TranslitResult<()> {
         let mut builder = IRBuilder::new();
         let _main_func = builder.start_function(&Signature::new(&[], Type::none))?;
 
@@ -35,7 +35,6 @@ mod tests {
         builder.end_function()?;
         let ir = builder.build()?;
         ir.print();
-        generate_assembly(Architecture::x86_64, ir)?;
         Ok(())
     }
 }

@@ -1,7 +1,8 @@
-use super::instruction::{Arg, Instruction, InstructionCode};
+use super::instruction::{Arg, Instruction, InstructionCode as IC};
 use super::types::{Function, FunctionID, Label, Signature, Variable};
 use super::IR;
 use crate::error::{TranslitError, TranslitResult};
+use crate::Literal;
 
 /// IR Builder
 #[derive(Debug, Clone, Default)]
@@ -54,8 +55,7 @@ impl IRBuilder {
         };
 
         *end = Some(self.instructions.len());
-        self.instructions
-            .push(Instruction(InstructionCode::RET as u64, vec![]));
+        self.instructions.push(Instruction(IC::RET, vec![]));
         Ok(())
     }
 
@@ -73,20 +73,32 @@ impl IRBuilder {
                 .then_some(())
                 .ok_or(TranslitError::InstrParamLenError)
         };
-        match num::FromPrimitive::from_u64(instr.0).unwrap() {
-            InstructionCode::ADD
-            | InstructionCode::SUB
-            | InstructionCode::MUL
-            | InstructionCode::DIV
-            | InstructionCode::MOD => params_err(2),
+        let same_typed = || match instr.1.as_slice() {
+            &[Arg::Literal(Literal(t1, _)), a @ Arg::Literal(Literal(t2, _))] => (t1 == t2)
+                .then_some(())
+                .ok_or(TranslitError::InvalidTypeError(a)),
+            _ => Err(TranslitError::InvalidParamError(instr.1[0])),
+        };
+        match instr.0 {
+            IC::ADD
+            | IC::SUB
+            | IC::MUL
+            | IC::DIV
+            | IC::MOD
+            | IC::CMPEQ
+            | IC::EQ
+            | IC::CMP
+            | IC::AND
+            | IC::SHL
+            | IC::SHR
+            | IC::OR => params_err(2).and_then(|_| same_typed()),
+            IC::NOT => params_err(1).and_then(|_| {
+                matches!(instr.1[0], Arg::Literal(_))
+                    .then_some(())
+                    .ok_or(TranslitError::InvalidParamError(instr.1[0]))
+            }),
 
-            InstructionCode::CMP => params_err(2),
-            InstructionCode::AND => params_err(2),
-            InstructionCode::OR => params_err(2),
-            InstructionCode::NOT => params_err(1),
-            InstructionCode::EQ => params_err(2),
-            InstructionCode::CMPEQ => params_err(2),
-            InstructionCode::RET => {
+            IC::RET => {
                 if let Some(Function { end: Some(_), .. }) | None = self.functions.last() {
                     return Err(TranslitError::RetOutsideFuncError);
                 }
@@ -96,8 +108,8 @@ impl IRBuilder {
     }
 
     /// Push an instruction into the IR. Returns an error if a RET instruction is passed outside a function.
-    pub fn push(&mut self, code: InstructionCode, args: Vec<Arg>) -> TranslitResult<Variable> {
-        let instr = Instruction(code as u64, args);
+    pub fn push(&mut self, code: IC, args: Vec<Arg>) -> TranslitResult<Variable> {
+        let instr = Instruction(code, args);
         self.verify(&instr)?;
         self.instructions.push(instr);
 

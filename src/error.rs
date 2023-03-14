@@ -1,6 +1,7 @@
 use std::error;
 use std::fmt;
 
+use crate::Arg;
 use crate::AssemblyGenerationError;
 
 pub type TranslitResult<T> = Result<T, TranslitError>;
@@ -13,6 +14,8 @@ pub enum TranslitError {
 
     RetOutsideFuncError,
     InstrParamLenError,
+    InvalidParamError(Arg),
+    InvalidTypeError(Arg),
 
     AssemblyGenerationError(AssemblyGenerationError),
 }
@@ -30,6 +33,12 @@ impl fmt::Display for TranslitError {
                 f,
                 "The number of parameters passed to instruction are incorrect."
             ),
+            TranslitError::InvalidParamError(arg) => {
+                write!(f, "Did not expect to see {} there", arg.format())
+            }
+            TranslitError::InvalidTypeError(arg) => {
+                write!(f, "The type of {} is wrong", arg.format())
+            }
             TranslitError::AssemblyGenerationError(info) => {
                 write!(f, "Error generating assembly: {}", info)
             }

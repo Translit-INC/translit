@@ -13,10 +13,7 @@ pub fn init_main_function() -> String {
 }
 
 pub fn convert_asm(instr: Instruction) -> TranslitResult<String> {
-    match (
-        num::FromPrimitive::from_u64(instr.0).unwrap(),
-        instr.1.as_slice(),
-    ) {
+    match (instr.0, instr.1.as_slice()) {
         (ADD, &[_a, _b]) => todo!(),
         _ => todo!(),
     }
