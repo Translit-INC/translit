@@ -1,4 +1,4 @@
-use crate::{Arg, Instruction, InstructionCode::*, Label, Literal, TranslitError, TranslitResult};
+use crate::{Instruction, InstructionCode::*, TranslitResult};
 
 pub fn init_data_section() -> String {
     "section .data\n".to_string()
@@ -13,13 +13,11 @@ pub fn init_main_function() -> String {
 }
 
 pub fn convert_asm(instr: Instruction) -> TranslitResult<String> {
-    return match (
+    match (
         num::FromPrimitive::from_u64(instr.0).unwrap(),
         instr.1.as_slice(),
     ) {
-        (ADD, &[a, b]) => Ok("".to_string()),
+        (ADD, &[_a, _b]) => todo!(),
         _ => todo!(),
-    };
-
-    Ok("".to_string())
+    }
 }

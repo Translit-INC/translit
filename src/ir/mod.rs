@@ -1,6 +1,5 @@
-use builder::IRBuilder;
 use instruction::{Arg, Instruction, InstructionCode};
-use types::{Function, FunctionID, Label, Literal, Signature, Type, Variable};
+use types::{Function, FunctionID, Label, Literal, Variable};
 
 pub mod builder;
 pub mod instruction;

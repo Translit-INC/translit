@@ -57,8 +57,8 @@ pub struct FunctionID(pub(crate) usize);
 #[derive(Debug, Clone)]
 /// Function Signature
 pub struct Signature {
-    pub(crate) params: Vec<Type>,
-    pub(crate) returns: Type,
+    pub params: Vec<Type>,
+    pub returns: Type,
 }
 
 impl Signature {

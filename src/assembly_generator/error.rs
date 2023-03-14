@@ -1,8 +1,6 @@
 use std::error;
 use std::fmt;
 
-use crate::TranslitError;
-
 pub type AssemblyGenerationResult<T> = Result<T, AssemblyGenerationError>;
 
 #[derive(Debug, Clone)]
