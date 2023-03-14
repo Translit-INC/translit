@@ -1,4 +1,3 @@
-
 use super::types::{BlockID, FunctionID, Literal, Variable};
 
 /// An instruction in the IR
@@ -10,7 +9,7 @@ impl Instruction {
     pub fn new(code: InstructionCode, args: [Arg; 3]) -> Instruction {
         Instruction(code as u64, args)
     }
-   
+
 }
 
 /// Argument passed to an instruction
