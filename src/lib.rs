@@ -21,7 +21,7 @@ mod tests {
     #[test]
     fn asm_gen() -> TranslitResult<()> {
         let mut builder = IRBuilder::new();
-        let _main_func = builder.start_function(&Signature::new(&[], Type::NONE))?;
+        let _main_func = builder.start_function(&Signature::new(&[], Type::none))?;
 
         builder.push(
             InstructionCode::ADD,

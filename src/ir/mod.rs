@@ -29,13 +29,13 @@ impl IR {
                 }
             }
             println!(
-                "\t{:?} {}",
+                "\tv{i} = {:?} {}",
                 <InstructionCode as num::FromPrimitive>::from_u64(instr.0).unwrap(),
                 instr.1.iter().fold(String::new(), |s, a| match a {
                     Arg::Label(Label(id)) => format!("{s}l{id} "),
                     Arg::Function(FunctionID(id)) => format!("{s}f{id} "),
                     Arg::Var(Variable(id)) => format!("{s}v{id} "),
-                    Arg::Literal(Literal(t, a)) => format!("{s}({t:?}){a} "),
+                    Arg::Literal(Literal(t, a)) => format!("{s}{a}{t:?} "),
                 })
             )
         }

@@ -1,17 +1,18 @@
 /// Type of a literal or variable
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[allow(non_camel_case_types)]
 pub enum Type {
     /// 8-bit integer
-    I8,
+    i8,
     /// 16-bit integer
-    I16,
+    i16,
     /// 32-bit integer
-    I32,
+    i32,
     /// 64-bit integer
-    I64,
+    i64,
     /// None
     #[default]
-    NONE,
+    none,
 }
 
 /// A literal value
@@ -20,19 +21,19 @@ pub struct Literal(pub(crate) Type, pub(crate) u64); // Actual value
 
 impl Literal {
     pub fn int8(n: i8) -> Literal {
-        Literal(Type::I8, n as _)
+        Literal(Type::i8, n as _)
     }
 
     pub fn int16(n: i16) -> Literal {
-        Literal(Type::I8, n as _)
+        Literal(Type::i16, n as _)
     }
 
     pub fn int32(n: i32) -> Literal {
-        Literal(Type::I8, n as _)
+        Literal(Type::i32, n as _)
     }
 
     pub fn int64(n: i64) -> Literal {
-        Literal(Type::I8, n as _)
+        Literal(Type::i64, n as _)
     }
 }
 
