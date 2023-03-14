@@ -15,7 +15,7 @@ pub enum Type {
 }
 
 /// A literal value
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Literal(pub(crate) Type, pub(crate) u64); // Actual value
 
 impl Literal {
@@ -37,7 +37,7 @@ impl Literal {
 }
 
 /// A variable
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Variable(pub(crate) usize); // reference to value stored in IRBuilder
 
 #[derive(Debug, Clone)]
@@ -70,15 +70,6 @@ impl Signature {
     }
 }
 
-/// A basic block.
-#[derive(Debug, Clone)]
-pub struct Block {
-    /// this hold the index of the first instruction of the function
-    pub(crate) start: usize,
-    /// this hold the index of the last instruction of the function
-    pub(crate) end: Option<usize>,
-}
-
 /// Reference to a block
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct BlockID(pub(crate) usize);
+pub struct Label(pub(crate) usize);

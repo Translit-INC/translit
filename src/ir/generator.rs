@@ -1,11 +1,6 @@
-use super::builder::IRBuilder;
-use crate::error::{TranslitError, TranslitResult};
-
-/*
- *
- *  First Function will be considered as the main function......
- *
- */
+use super::IRBuilder;
+use crate::{TranslitError, TranslitResult};
+use crate::assembly_generator::x86_64::generate_assembly_nasm_x86_64;
 
 impl IRBuilder {
     pub fn generate_assembly(&mut self) -> TranslitResult<()> {

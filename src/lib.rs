@@ -1,30 +1,39 @@
 #![allow(dead_code)]
 #![allow(unused)]
 
-extern crate num;
-#[macro_use]
-extern crate num_derive;
-
 pub mod error;
 pub mod ir;
 
-pub(crate) mod assembly_generator;
+mod assembly_generator;
+
+pub use assembly_generator::error::{AssemblyGenerationError, AssemblyGenerationResult};
+pub use assembly_generator::{generate_assembly, Architecture};
+pub use error::{TranslitError, TranslitResult};
+pub use ir::builder::IRBuilder;
+pub use ir::instruction::{Arg, Instruction, InstructionCode};
+pub use ir::types::{Function, FunctionID, Label, Literal, Signature, Type, Variable};
+pub use ir::IR;
 
 #[cfg(test)]
 mod tests {
-    use crate::error::{TranslitError, TranslitResult};
-    use crate::ir::{IRBuilder, Signature, Instruction, InstructionCode, Type, Arg, Literal};
+    use super::*;
 
     #[test]
-    fn asm_gen() {
+    fn asm_gen() -> TranslitResult<()> {
         let mut builder = IRBuilder::new();
-        let main_func = builder.start_function(&Signature::new(&[Type::NONE], Type::NONE));
+        let main_func = builder.start_function(&Signature::new(&[], Type::NONE))?;
 
-        builder.push(InstructionCode::ADD, [Arg::Literal(Literal::int8(1)), Arg::Literal(Literal::int8(2))]);
-        builder.push(InstructionCode::SUB, [Arg::Literal(Literal::int8(3)), Arg::Literal(Literal::int8(1))]);
+        builder.push(
+            InstructionCode::ADD,
+            [Literal::int8(1).into(), Literal::int8(2).into()],
+        )?;
+        builder.push(
+            InstructionCode::SUB,
+            [Literal::int8(3).into(), Literal::int8(1).into()],
+        )?;
 
-        builder.end_function().unwrap();
-
-        builder.generate_assembly();
+        builder.end_function()?;
+        generate_assembly(Architecture::x86_64, builder.build()?)?;
+        Ok(())
     }
 }

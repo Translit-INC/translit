@@ -1,4 +1,6 @@
-use super::types::{BlockID, FunctionID, Literal, Variable};
+use num_derive::FromPrimitive;
+
+use super::types::{FunctionID, Label, Literal, Variable};
 
 /// An instruction in the IR
 #[derive(Debug, Clone)]
@@ -9,7 +11,6 @@ impl Instruction {
     pub fn new(code: InstructionCode, args: [Arg; 3]) -> Instruction {
         Instruction(code as u64, args)
     }
-
 }
 
 /// Argument passed to an instruction
@@ -22,7 +23,7 @@ pub enum Arg {
     /// Function
     Function(FunctionID),
     /// Basic block
-    Block(BlockID),
+    Label(Label),
     /// None
     #[default]
     NONE,
@@ -40,9 +41,9 @@ impl From<Literal> for Arg {
     }
 }
 
-impl From<BlockID> for Arg {
-    fn from(value: BlockID) -> Self {
-        Arg::Block(value)
+impl From<Label> for Arg {
+    fn from(value: Label) -> Self {
+        Arg::Label(value)
     }
 }
 
@@ -54,9 +55,7 @@ impl From<FunctionID> for Arg {
 
 /// Instruction Code
 #[repr(u64)]
-
-#[derive(FromPrimitive)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, FromPrimitive)]
 pub enum InstructionCode {
     /// a + b
     ADD = 0x01,
