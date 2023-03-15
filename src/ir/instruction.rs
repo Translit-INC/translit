@@ -81,10 +81,12 @@ pub enum InstructionCode {
     CMPEQ,
     /// a > b
     CMP,
-    /// JUMP instruction
+    /// Jump to label
     JMP,
-    /// CALL instruction
+    /// call a function
     CALL,
+    /// Jump to label if condition is true
+    JMPIF,
     /// return from function
     RET,
 }

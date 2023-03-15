@@ -100,11 +100,24 @@ impl IRBuilder {
             IC::CALL => params_err(1).and_then(|_| {
                 matches!(instr.1[0], Arg::Function(_))
                     .then_some(())
-                    .ok_or(TranslitError::InvalidTypeError(instr.1[0]))
+                    .ok_or(TranslitError::InvalidParamError(instr.1[0]))
             }),
             IC::JMP => params_err(1).and_then(|_| {
-                matches!(instr.1[0], Arg::Label(_)).then_some(()).ok_or(TranslitError::InvalidTypeError(instr.1[0]))
+                matches!(instr.1[0], Arg::Label(_))
+                    .then_some(())
+                    .ok_or(TranslitError::InvalidParamError(instr.1[0]))
             }),
+            IC::JMPIF => params_err(2)
+                .and_then(|_| {
+                    matches!(instr.1[0], Arg::Label(_))
+                        .then_some(())
+                        .ok_or(TranslitError::InvalidParamError(instr.1[0]))
+                })
+                .and_then(|_| {
+                    matches!(instr.1[1], Arg::Var(_))
+                        .then_some(())
+                        .ok_or(TranslitError::InvalidParamError(instr.1[1]))
+                }),
             IC::RET => {
                 if let Some(Function { end: Some(_), .. }) | None = self.functions.last() {
                     return Err(TranslitError::RetOutsideFuncError);
