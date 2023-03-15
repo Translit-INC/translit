@@ -97,7 +97,14 @@ impl IRBuilder {
                     .then_some(())
                     .ok_or(TranslitError::InvalidParamError(instr.1[0]))
             }),
-
+            IC::CALL => params_err(1).and_then(|_| {
+                matches!(instr.1[0], Arg::Function(_))
+                    .then_some(())
+                    .ok_or(TranslitError::InvalidTypeError(instr.1[0]))
+            }),
+            IC::JMP => params_err(1).and_then(|_| {
+                matches!(instr.1[0], Arg::Label(_)).then_some(()).ok_or(TranslitError::InvalidTypeError(instr.1[0]))
+            }),
             IC::RET => {
                 if let Some(Function { end: Some(_), .. }) | None = self.functions.last() {
                     return Err(TranslitError::RetOutsideFuncError);

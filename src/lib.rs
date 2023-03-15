@@ -22,7 +22,6 @@ mod tests {
     fn gen_ir() -> TranslitResult<()> {
         let mut builder = IRBuilder::new();
         let _main_func = builder.start_function(&Signature::new(&[], Type::none))?;
-
         builder.push(
             InstructionCode::ADD,
             vec![Literal::int8(1).into(), Literal::int8(2).into()],
@@ -31,7 +30,6 @@ mod tests {
             InstructionCode::SUB,
             vec![Literal::int8(3).into(), Literal::int8(1).into()],
         )?;
-
         builder.end_function()?;
         let ir = builder.build()?;
         ir.print();
