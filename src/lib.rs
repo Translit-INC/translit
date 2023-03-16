@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 #![allow(unused)]
+#![allow(clippy::new_without_default)]
 
 pub mod error;
 pub mod ir;

@@ -2,7 +2,6 @@ pub mod error;
 pub mod x86_64;
 
 use crate::{TranslitError, TranslitResult, IR};
-use error::{AssemblyGenerationError, AssemblyGenerationResult};
 
 #[allow(non_camel_case_types)]
 pub enum Architecture {

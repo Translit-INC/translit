@@ -49,8 +49,12 @@ impl fmt::Display for TranslitError {
             }
             TranslitError::DivideByZeroError => write!(f, "Cannot divide by zero."),
             TranslitError::CalledMainFunction => write!(f, "Cannot call main function itself."),
-            TranslitError::FunctionNotFound => write!(f, "Function not found (in call instruction)"),
-            TranslitError::CallOutsideFunction => write!(f, "Tried to call function outside a function")
+            TranslitError::FunctionNotFound => {
+                write!(f, "Function not found (in call instruction)")
+            }
+            TranslitError::CallOutsideFunction => {
+                write!(f, "Tried to call function outside a function")
+            }
         }
     }
 }

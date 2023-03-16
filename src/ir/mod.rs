@@ -1,5 +1,4 @@
-use instruction::{Arg, Instruction};
-use types::{Function, FunctionID, Label, Literal, Variable};
+use crate::{Arg, Function, FunctionID, Instruction, Label, Literal, Variable};
 
 pub mod builder;
 pub mod instruction;

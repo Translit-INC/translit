@@ -1,4 +1,4 @@
-use super::types::{FunctionID, Label, Literal, Variable};
+use crate::{FunctionID, Label, Literal, Variable};
 
 /// An instruction in the IR
 #[derive(Debug, Clone)]

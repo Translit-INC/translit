@@ -1,10 +1,9 @@
-use super::instruction::{Arg, Instruction, InstructionCode as IC};
-use super::types::{Function, FunctionID, Label, Signature, Variable};
-use super::IR;
-use crate::error::{TranslitError, TranslitResult};
-use crate::Literal;
+use crate::{
+    Arg, Function, FunctionID, Instruction, InstructionCode as IC, Label, Literal, Signature,
+    TranslitError, TranslitResult, Variable, IR,
+};
 
-/// IR Builder #[derive(Debug, Clone, Default)]
+/// IR Builder
 pub struct IRBuilder {
     instructions: Vec<Instruction>,
     functions: Vec<Function>,
@@ -38,6 +37,9 @@ impl IRBuilder {
     /// Every instruction after this function call will be considered as the part of the function until end_function is called.
     /// Returns an error if a function is already going on
     pub fn start_function(&mut self, sig: &Signature) -> TranslitResult<FunctionID> {
+        if let Some(Function { end: None, .. }) = self.functions.last() {
+            return Err(TranslitError::FunctionStartError);
+        }
         let f = Function {
             start: self.instructions.len(),
             end: None,
@@ -108,19 +110,17 @@ impl IRBuilder {
             }),
 
             IC::CALL => params_err(1).and_then(|_| {
-                if !self.function_ongoing() {
+                if let Some(Function { end: Some(_), .. }) | None = self.functions.last() {
                     return Err(TranslitError::CallOutsideFunction);
                 }
 
-                match instr.1.as_slice() {
-                    &[Arg::Function(FunctionID(id))] => {
-                        matches!(self.functions.last(), Some(first) if first.start != id)
-                            .then_some(())
-                            .ok_or(TranslitError::CalledMainFunction)
-                    },
+                let Arg::Function(FunctionID(id)) = instr.1[0] else {
+                    return Err(TranslitError::InvalidParamError(instr.1[0]));
+                };
 
-                    _ => Err(TranslitError::InvalidParamError(instr.1[0]))
-                }
+                matches!(self.functions.last(), Some(last) if last.start != id)
+                    .then_some(())
+                    .ok_or(TranslitError::CalledMainFunction)
             }),
 
             IC::JMP => params_err(1).and_then(|_| {
@@ -144,10 +144,8 @@ impl IRBuilder {
                     return Err(TranslitError::RetOutsideFuncError);
                 }
                 params_err(1)
-            },
+            }
             IC::VAR => params_err(2),
-
-            _ => unreachable!()
         }
     }
 
@@ -158,9 +156,5 @@ impl IRBuilder {
         self.instructions.push(instr);
 
         Ok(Variable(self.instructions.len() - 1))
-    }
-
-    pub(crate) fn function_ongoing(&self) -> bool {
-        (self.functions.len() != 0 && self.functions.last().unwrap().end.is_none())
     }
 }

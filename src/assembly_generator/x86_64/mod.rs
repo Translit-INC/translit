@@ -1,8 +1,10 @@
 mod helper;
 use helper::*;
 
-use super::{AssemblyGenerationError, AssemblyGenerationResult};
-use crate::{Arg, InstructionCode::*, Literal, Type, IR};
+use crate::{
+    Arg::*, AssemblyGenerationError, AssemblyGenerationResult, FunctionID, Instruction,
+    InstructionCode::*, IR,
+};
 
 pub fn generate_assembly_nasm_x86_64(ir: IR) -> AssemblyGenerationResult<String> {
     let Some(main_func) = ir.functions.last() else {
@@ -26,11 +28,38 @@ pub fn generate_assembly_nasm_x86_64(ir: IR) -> AssemblyGenerationResult<String>
             text_section += gen(inst, &ir).as_str();
         }
 
-        text_section += end_function().as_str();
+        text_section += END_FUNCTION;
     }
 
     // generated assembly
     Ok(format!(
-        "{data_section}\n{text_section}\n{main_function}\n{EXIT_SYSCALL}\n",
+        "{data_section}{text_section}{main_function}{EXIT_SYSCALL}",
     ))
+}
+
+pub fn gen(inst: &Instruction, ir: &IR) -> String {
+    match (inst.0, inst.1.as_slice()) {
+        (ADD, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 + b.1),
+        (SUB, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 - b.1),
+        (MUL, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 * b.1),
+        (DIV, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 / b.1),
+        (MOD, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 % b.1),
+        (AND, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 & b.1),
+        (OR, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 | b.1),
+        (NOT, &[Literal(a)]) => format!("\tpush {}\n", !a.1 as u8),
+        (SHL, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 << b.1),
+        (SHR, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 >> b.1),
+        (EQ, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 == b.1),
+        (CMP, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 > b.1),
+        (CMPEQ, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 >= b.1),
+        (CALL, &[Function(FunctionID(id))]) => {
+            if !ir.functions.iter().any(|i| i.start == id) {
+                panic!("Function not defined");
+            } else {
+                format!("\tcall func_{id}\n")
+            }
+        }
+
+        _ => unimplemented!(),
+    }
 }

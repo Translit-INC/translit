@@ -11,7 +11,7 @@ pub enum Type {
     /// 64-bit integer
     i64,
     /// 1-bit boolean (not really)
-    boolean,
+    bool,
     /// None
     #[default]
     none,
@@ -38,8 +38,8 @@ impl Literal {
         Literal(Type::i64, n as _)
     }
 
-    pub fn boolean(n: bool) -> Literal {
-        Literal(Type::boolean, n as _)
+    pub fn bool(n: bool) -> Literal {
+        Literal(Type::bool, n as _)
     }
 }
 
