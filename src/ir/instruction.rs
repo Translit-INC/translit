@@ -71,9 +71,9 @@ pub enum InstructionCode {
     OR,
     /// !a
     NOT,
-    /// a >> b
-    SHL,
     /// a << b
+    SHL,
+    /// a >> b
     SHR,
     /// a == b
     EQ,
