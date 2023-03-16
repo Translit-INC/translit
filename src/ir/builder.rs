@@ -73,17 +73,18 @@ impl IRBuilder {
                 .then_some(())
                 .ok_or(TranslitError::InstrParamLenError)
         };
+
         let same_typed = || match instr.1.as_slice() {
             &[Arg::Literal(Literal(t1, _)), a @ Arg::Literal(Literal(t2, _))] => (t1 == t2)
                 .then_some(())
                 .ok_or(TranslitError::InvalidTypeError(a)),
             _ => Err(TranslitError::InvalidParamError(instr.1[0])),
         };
+
         match instr.0 {
             IC::ADD
             | IC::SUB
             | IC::MUL
-            | IC::DIV
             | IC::MOD
             | IC::CMPEQ
             | IC::EQ
@@ -92,6 +93,14 @@ impl IRBuilder {
             | IC::SHL
             | IC::SHR
             | IC::OR => params_err(2).and_then(|_| same_typed()),
+
+            IC::DIV => {
+                match instr.1.as_slice() {
+                    &[_, Arg::Literal(Literal(_, 0))] => Err(TranslitError::DividedByZeroError),
+                    _ => params_err(2).and_then(|_| same_typed())
+                }
+            },
+
             IC::NOT => params_err(1).and_then(|_| {
                 matches!(instr.1[0], Arg::Literal(_))
                     .then_some(())
