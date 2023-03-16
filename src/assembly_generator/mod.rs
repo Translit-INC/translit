@@ -9,7 +9,7 @@ pub enum Architecture {
     x86_64,
 }
 
-pub fn generate_assembly(arch: Architecture, ir: IR) -> TranslitResult<()> {
+pub fn generate_assembly(arch: Architecture, ir: IR) -> TranslitResult<String> {
     match arch {
         Architecture::x86_64 => x86_64::generate_assembly_nasm_x86_64(ir)
             .map_err(TranslitError::AssemblyGenerationError),
