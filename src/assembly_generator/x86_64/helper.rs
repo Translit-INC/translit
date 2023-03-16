@@ -1,4 +1,4 @@
-use crate::{Arg, Instruction, InstructionCode::*, TranslitResult, Type, Literal, Variable};
+use crate::{Arg, Instruction, InstructionCode::*, TranslitResult, Type, Literal, Variable, FunctionID, IR};
 
 pub const INIT_DATA_SECTION: &str = "section .data";
 pub const INIT_TEXT_SECTION: &str = "section .text\nglobal _start\n";
@@ -41,7 +41,7 @@ pub fn end_function() -> String {
     format!("\n\tret\n")
 }
 
-pub fn gen(inst: &Instruction) -> String {
+pub fn gen(inst: &Instruction, ir: &IR) -> String {
     match (inst.0, inst.1.as_slice()) {
         (ADD, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() + get_value(b).unwrap()),
         (SUB, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() - get_value(b).unwrap()),
@@ -56,6 +56,13 @@ pub fn gen(inst: &Instruction) -> String {
         (EQ,  &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() == get_value(b).unwrap()),
         (CMP, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() > get_value(b).unwrap()),
         (CMPEQ , &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() >= get_value(b).unwrap()),
+        (CALL, &[Arg::Function(FunctionID(id))]) => {
+            if ir.functions.iter().find(|i| i.start == id).is_none() {
+                panic!("Function not defined");
+            } else {
+                format!("\n\tcall func_{id}")
+            }
+        }
 
         _ => unimplemented!()
     }

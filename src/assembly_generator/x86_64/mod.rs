@@ -5,7 +5,7 @@ use super::{AssemblyGenerationError, AssemblyGenerationResult};
 use crate::{Arg, InstructionCode::*, Literal, Type, IR};
 
 pub fn generate_assembly_nasm_x86_64(ir: IR) -> AssemblyGenerationResult<String> {
-    let Some(main_func) = ir.functions.first() else {
+    let Some(main_func) = ir.functions.last() else {
         return Err(AssemblyGenerationError::NoMainFunction);
     };
 
@@ -16,14 +16,14 @@ pub fn generate_assembly_nasm_x86_64(ir: IR) -> AssemblyGenerationResult<String>
     let mut main_function = INIT_MAIN_SECTION.to_string();
 
     for inst in main_func_instructions {
-        main_function += gen(inst).as_str();
+        main_function += gen(inst, &ir).as_str();
     }
 
-    for func in &ir.functions[1..] {
+    for func in &ir.functions[..ir.functions.len() - 1] {
         text_section += begin_function(func.start).as_str();
 
         for inst in &ir.instructions[func.start..func.end.unwrap()] {
-            text_section += gen(inst).as_str();
+            text_section += gen(inst, &ir).as_str();
         }
 
         text_section += end_function().as_str();
