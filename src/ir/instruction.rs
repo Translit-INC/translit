@@ -89,4 +89,7 @@ pub enum InstructionCode {
     JMPIF,
     /// return from function
     RET,
+
+    /// variable
+    VAR,
 }

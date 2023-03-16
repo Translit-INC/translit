@@ -1,4 +1,4 @@
-use crate::{Arg, Instruction, InstructionCode::*, TranslitResult, Type};
+use crate::{Arg, Instruction, InstructionCode::*, TranslitResult, Type, Literal, Variable};
 
 pub const INIT_DATA_SECTION: &str = "section .data";
 pub const INIT_TEXT_SECTION: &str = "section .text\nglobal _start\n";
@@ -10,6 +10,15 @@ pub fn get_info(a: Arg) -> Option<(Type, u64)> {
         Some((x.0, x.1))
     } else {
         None
+    }
+}
+
+pub fn get_value(a: Arg) -> Option<u64> {
+    match a {
+        Arg::Literal(Literal(_, x)) => Some(x),
+        Arg::Var(Variable(x)) => Some(x as _),
+
+        _ => unimplemented!()
     }
 }
 

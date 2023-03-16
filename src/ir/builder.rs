@@ -4,8 +4,7 @@ use super::IR;
 use crate::error::{TranslitError, TranslitResult};
 use crate::Literal;
 
-/// IR Builder
-#[derive(Debug, Clone, Default)]
+/// IR Builder #[derive(Debug, Clone, Default)]
 pub struct IRBuilder {
     instructions: Vec<Instruction>,
     functions: Vec<Function>,
@@ -133,7 +132,10 @@ impl IRBuilder {
                     return Err(TranslitError::RetOutsideFuncError);
                 }
                 params_err(1)
-            }
+            },
+            IC::VAR => params_err(2),
+
+            _ => unreachable!()
         }
     }
 
