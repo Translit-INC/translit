@@ -19,16 +19,14 @@ pub fn generate_assembly_nasm_x86_64(ir: IR) -> AssemblyGenerationResult<String>
         main_function += gen(inst).as_str();
     }
 
-    let mut idx: usize = 0;
     for func in &ir.functions[1..] {
-        text_section += begin_function(idx).as_str();
+        text_section += begin_function(func.start).as_str();
 
         for inst in &ir.instructions[func.start..func.end.unwrap()] {
             text_section += gen(inst).as_str();
         }
 
         text_section += end_function().as_str();
-        idx += 1;
     }
 
     // generated assembly
