@@ -9,32 +9,26 @@ pub fn generate_assembly_nasm_x86_64(ir: IR) -> AssemblyGenerationResult<String>
         return Err(AssemblyGenerationError::NoMainFunction);
     };
 
-    let main_func_instructions =
-        ir.instructions[main_func.start..=main_func.end.unwrap() - 1].to_vec();
+    let main_func_instructions = &ir.instructions[main_func.start..main_func.end.unwrap()];
 
     let data_section = INIT_DATA_SECTION.to_string();
-    let text_section = INIT_TEXT_SECTION.to_string();
+    let mut text_section = INIT_TEXT_SECTION.to_string();
     let mut main_function = INIT_MAIN_SECTION.to_string();
 
     for inst in main_func_instructions {
-        // I will do some cheating in literals
-        main_function += match (inst.0, inst.1.as_slice()) {
-            (ADD, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() + get_value(b).unwrap()),
-            (SUB, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() - get_value(b).unwrap()),
-            (MUL, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() * get_value(b).unwrap()),
-            (DIV, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() / get_value(b).unwrap()), // zero division is checking in the builder
-            (MOD, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() % get_value(b).unwrap()),
-            (AND, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() & get_value(b).unwrap()),
-            (OR,  &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() | get_value(b).unwrap()),
-            (NOT, &[a])    => format!("\n\tpush {}", !get_value(a).unwrap() as u8),
-            (SHL, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() << get_value(b).unwrap()),
-            (SHR, &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() >> get_value(b).unwrap()),
-            (EQ , &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() == get_value(b).unwrap()),
-            (CMP , &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() > get_value(b).unwrap()),
-            (CMPEQ , &[a, b]) => format!("\n\tpush {}", get_value(a).unwrap() >= get_value(b).unwrap()),
+        main_function += gen(inst).as_str();
+    }
 
-            _ => unimplemented!()
-        }.as_str();
+    let mut idx: usize = 0;
+    for func in &ir.functions[1..] {
+        text_section += begin_function(idx).as_str();
+
+        for inst in &ir.instructions[func.start..func.end.unwrap()] {
+            text_section += gen(inst).as_str();
+        }
+
+        text_section += end_function().as_str();
+        idx += 1;
     }
 
     // generated assembly
