@@ -94,12 +94,13 @@ impl IRBuilder {
             | IC::SHR
             | IC::OR => params_err(2).and_then(|_| same_typed()),
 
-            IC::DIV => {
-                match instr.1.as_slice() {
-                    &[_, Arg::Literal(Literal(_, 0))] => Err(TranslitError::DividedByZeroError),
-                    _ => params_err(2).and_then(|_| same_typed())
+            IC::DIV => params_err(2).and_then(|_| same_typed()).and_then(|_| {
+                if let Arg::Literal(Literal(_, 0)) = instr.1[1] {
+                    Err(TranslitError::DivideByZeroError)
+                } else {
+                    Ok(())
                 }
-            },
+            }),
 
             IC::NOT => params_err(1).and_then(|_| {
                 matches!(instr.1[0], Arg::Literal(_))
