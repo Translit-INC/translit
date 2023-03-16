@@ -44,39 +44,38 @@ mod tests {
     #[test]
     fn test_interpreter() -> TranslitResult<()> {
         let mut builder = IRBuilder::new();
+        let _test_func = builder.start_function(&Signature::new(&[], Type::none))?;
 
-        {
-            let _main_func = builder.start_function(&Signature::new(&[], Type::none))?;
-            builder.push(
-                InstructionCode::ADD,
-                vec![Literal::int8(1).into(), Literal::int8(2).into()],
-            )?;
-            builder.push(
-                InstructionCode::SUB,
-                vec![Literal::int8(3).into(), Literal::int8(1).into()],
-            )?;
-            builder.end_function()?;
-        }
+        builder.push(
+            InstructionCode::MUL,
+            vec![Literal::int8(6).into(), Literal::int8(9).into()],
+        )?;
 
-        {
-            let _test_func = builder.start_function(&Signature::new(&[], Type::none))?;
+        builder.push(
+            InstructionCode::ADD,
+            vec![Literal::int8(6).into(), Literal::int8(9).into()],
+        )?;
 
-            builder.push(
-                InstructionCode::MUL,
-                vec![Literal::int8(6).into(), Literal::int8(9).into()],
-            )?;
+        builder.end_function()?;
 
-            builder.push(
-                InstructionCode::ADD,
-                vec![Literal::int8(6).into(), Literal::int8(9).into()],
-            )?;
+        let _main_func = builder.start_function(&Signature::new(&[], Type::none))?;
 
-            builder.end_function()?;
-        }
+        builder.push(
+            InstructionCode::ADD,
+            vec![Literal::int8(1).into(), Literal::int8(2).into()],
+        )?;
+
+        builder.push(
+            InstructionCode::SUB,
+            vec![Literal::int8(3).into(), Literal::int8(1).into()],
+        )?;
+
+        builder.push(InstructionCode::CALL, vec![Arg::Function(_test_func)])?;
+        builder.end_function()?;
 
         let ir = builder.build()?;
         let asm = generate_assembly(Architecture::x86_64, ir)?;
-        println!("{}", asm);
+        println!("asm: {}", asm);
         Ok(())
     }
 }

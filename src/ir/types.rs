@@ -61,6 +61,12 @@ pub struct Function {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FunctionID(pub(crate) usize);
 
+impl From<Function> for FunctionID {
+    fn from(source: Function) -> Self {
+        Self(source.start)
+    }
+}
+
 #[derive(Debug, Clone)]
 /// Function Signature
 pub struct Signature {

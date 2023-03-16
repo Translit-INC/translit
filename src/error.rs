@@ -18,6 +18,9 @@ pub enum TranslitError {
     InvalidTypeError(Arg),
 
     DivideByZeroError,
+    CalledMainFunction,
+    FunctionNotFound,
+    CallOutsideFunction,
 
     AssemblyGenerationError(AssemblyGenerationError),
 }
@@ -45,6 +48,9 @@ impl fmt::Display for TranslitError {
                 write!(f, "Error generating assembly: {}", info)
             }
             TranslitError::DivideByZeroError => write!(f, "Cannot divide by zero."),
+            TranslitError::CalledMainFunction => write!(f, "Cannot call main function itself."),
+            TranslitError::FunctionNotFound => write!(f, "Function not found (in call instruction)"),
+            TranslitError::CallOutsideFunction => write!(f, "Tried to call function outside a function")
         }
     }
 }
