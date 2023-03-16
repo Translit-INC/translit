@@ -17,6 +17,8 @@ pub enum TranslitError {
     InvalidParamError(Arg),
     InvalidTypeError(Arg),
 
+    DividedByZeroError,
+
     AssemblyGenerationError(AssemblyGenerationError),
 }
 
@@ -41,7 +43,8 @@ impl fmt::Display for TranslitError {
             }
             TranslitError::AssemblyGenerationError(info) => {
                 write!(f, "Error generating assembly: {}", info)
-            }
+            },
+            TranslitError::DividedByZeroError => write!(f, "Cannot divide by zero."),
         }
     }
 }
