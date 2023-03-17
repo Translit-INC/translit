@@ -28,12 +28,12 @@ impl IR {
                 }
             }
             println!(
-                "\tv{i} = {:?} {}",
+                "\t{:?} {}",
                 instr.0,
                 instr.1.iter().fold(String::new(), |s, a| match a {
                     Arg::Label(Label(id)) => format!("{s}l{id} "),
                     Arg::Function(FunctionID(id)) => format!("{s}f{id} "),
-                    Arg::Var(Variable(id)) => format!("{s}v{id} "),
+                    Arg::Var(Variable(_, id)) => format!("{s}@{id} "),
                     Arg::Literal(Literal(t, a)) => format!("{s}{a}{t:?} "),
                 })
             )

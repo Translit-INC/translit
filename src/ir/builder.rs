@@ -1,6 +1,6 @@
 use crate::{
-    Arg, Function, FunctionID, Instruction, InstructionCode as IC, Label, Literal, Signature,
-    TranslitError, TranslitResult, Variable, IR,
+    Arg, Function, FunctionID, Instruction, InstructionCode as IC, InstructionOuput, Label,
+    Literal, Signature, TranslitError, TranslitResult, Type, VarAssignable, Variable, IR,
 };
 
 /// IR Builder
@@ -8,6 +8,8 @@ pub struct IRBuilder {
     instructions: Vec<Instruction>,
     functions: Vec<Function>,
     labels: Vec<Label>,
+    /// id and type of intructions in self.instructions
+    memory: Vec<(usize, Type)>,
 }
 
 impl IRBuilder {
@@ -17,7 +19,7 @@ impl IRBuilder {
             instructions: Vec::new(),
             functions: Vec::new(),
             labels: Vec::new(),
-            // generated_assembly: None,
+            memory: Vec::new(),
         }
     }
 
@@ -68,18 +70,35 @@ impl IRBuilder {
     }
 
     /// Verify the instruction arguments
-    pub fn verify(&self, instr: &Instruction) -> TranslitResult<()> {
+    pub fn get_type(&self, instr: &Instruction) -> TranslitResult<Type> {
         let params_err = |length: usize| {
             (instr.1.len() == length)
                 .then_some(())
                 .ok_or(TranslitError::InstrParamLenError)
         };
 
-        let same_typed = || match instr.1.as_slice() {
-            &[Arg::Literal(Literal(t1, _)), a @ Arg::Literal(Literal(t2, _))] => (t1 == t2)
-                .then_some(())
+        let same_typed = || match *instr.1.as_slice() {
+            [Arg::Literal(Literal(t1, _)), a @ Arg::Literal(Literal(t2, _))] => (t1 == t2)
+                .then_some(t1)
+                .ok_or(TranslitError::InvalidTypeError(a)),
+            [Arg::Var(Variable(t1, _)), a @ Arg::Literal(Literal(t2, _))] => (t1 == t2)
+                .then_some(t1)
+                .ok_or(TranslitError::InvalidTypeError(a)),
+            [Arg::Literal(Literal(t1, _)), a @ Arg::Var(Variable(t2, _))] => (t1 == t2)
+                .then_some(t1)
+                .ok_or(TranslitError::InvalidTypeError(a)),
+            [Arg::Var(Variable(t1, _)), a @ Arg::Var(Variable(t2, _))] => (t1 == t2)
+                .then_some(t1)
                 .ok_or(TranslitError::InvalidTypeError(a)),
             _ => Err(TranslitError::InvalidParamError(instr.1[0])),
+        };
+
+        let get_type = || {
+            if let Arg::Literal(Literal(t, _)) | Arg::Var(Variable(t, _)) = instr.1[0] {
+                Ok(t)
+            } else {
+                Err(TranslitError::InvalidParamError(instr.1[0]))
+            }
         };
 
         match instr.0 {
@@ -93,21 +112,10 @@ impl IRBuilder {
             | IC::AND
             | IC::SHL
             | IC::SHR
+            | IC::DIV
             | IC::OR => params_err(2).and_then(|_| same_typed()),
 
-            IC::DIV => params_err(2).and_then(|_| same_typed()).and_then(|_| {
-                if let Arg::Literal(Literal(_, 0)) = instr.1[1] {
-                    Err(TranslitError::DivideByZeroError)
-                } else {
-                    Ok(())
-                }
-            }),
-
-            IC::NOT => params_err(1).and_then(|_| {
-                matches!(instr.1[0], Arg::Literal(_))
-                    .then_some(())
-                    .ok_or(TranslitError::InvalidParamError(instr.1[0]))
-            }),
+            IC::NOT => params_err(1).and_then(|_| get_type()),
 
             IC::CALL => params_err(1).and_then(|_| {
                 if let Some(Function { end: Some(_), .. }) | None = self.functions.last() {
@@ -118,14 +126,16 @@ impl IRBuilder {
                     return Err(TranslitError::InvalidParamError(instr.1[0]));
                 };
 
-                matches!(self.functions.last(), Some(last) if last.start != id)
-                    .then_some(())
-                    .ok_or(TranslitError::CalledMainFunction)
+                if self.functions.len() - 1 == id {
+                    return Err(TranslitError::CalledMainFunction);
+                }
+
+                Ok(self.functions[id].sig.returns)
             }),
 
             IC::JMP => params_err(1).and_then(|_| {
                 matches!(instr.1[0], Arg::Label(_))
-                    .then_some(())
+                    .then_some(Type::none)
                     .ok_or(TranslitError::InvalidParamError(instr.1[0]))
             }),
             IC::JMPIF => params_err(2)
@@ -136,25 +146,76 @@ impl IRBuilder {
                 })
                 .and_then(|_| {
                     matches!(instr.1[1], Arg::Var(_))
-                        .then_some(())
+                        .then_some(Type::none)
                         .ok_or(TranslitError::InvalidParamError(instr.1[1]))
                 }),
             IC::RET => {
-                if let Some(Function { end: Some(_), .. }) | None = self.functions.last() {
-                    return Err(TranslitError::RetOutsideFuncError);
+                params_err(1)?;
+                match self.functions.last() {
+                    Some(Function { end: Some(_), .. }) | None => {
+                        Err(TranslitError::RetOutsideFuncError)
+                    }
+                    Some(Function { sig, .. }) => {
+                        if sig.returns != get_type()? {
+                            return Err(TranslitError::InvalidTypeError(instr.1[0]));
+                        }
+                        Ok(Type::none)
+                    }
                 }
-                params_err(1)
             }
-            IC::VAR => params_err(2),
+            IC::PUSH => {
+                panic!("Not meant for user");
+            }
         }
     }
 
     /// Push an instruction into the IR. Returns an error if a RET instruction is passed outside a function.
-    pub fn push(&mut self, code: IC, args: Vec<Arg>) -> TranslitResult<Variable> {
+    pub fn push(&mut self, code: IC, args: Vec<Arg>) -> TranslitResult<InstructionOuput> {
         let instr = Instruction(code, args);
-        self.verify(&instr).unwrap();
+        let type_ = self.get_type(&instr)?;
+        if type_ != Type::none {
+            self.memory.push((self.instructions.len(), type_))
+        }
         self.instructions.push(instr);
 
-        Ok(Variable(self.instructions.len() - 1))
+        Ok(InstructionOuput {
+            memory: (type_ != Type::none).then_some(self.memory.len() - 1),
+            type_,
+        })
+    }
+
+    pub fn create_var(&mut self, type_: Type) -> Variable {
+        Variable(type_, 0)
+    }
+
+    pub fn set_var(
+        &mut self,
+        var: &mut Variable,
+        assign: impl Into<VarAssignable>,
+    ) -> TranslitResult<()> {
+        match assign.into() {
+            VarAssignable::Literal(l @ Literal(t, _)) => {
+                if var.0 != t {
+                    return Err(TranslitError::InvalidTypeError(Arg::Literal(l)));
+                }
+                self.memory.push((self.instructions.len(), t));
+                self.instructions
+                    .push(Instruction(IC::PUSH, vec![l.into()]));
+                var.1 = self.memory.len() - 1;
+                Ok(())
+            }
+            VarAssignable::InstOut(InstructionOuput { memory, type_ }) => {
+                let Some(memory) = memory else {
+                    return Err(TranslitError::AssignedUnassignableValue);
+                };
+                if var.0 != type_ {
+                    return Err(TranslitError::InvalidTypeError(Arg::Var(Variable(
+                        type_, memory,
+                    ))));
+                }
+                var.1 = memory;
+                Ok(())
+            }
+        }
     }
 }

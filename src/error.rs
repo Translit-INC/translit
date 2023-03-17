@@ -17,7 +17,7 @@ pub enum TranslitError {
     InvalidParamError(Arg),
     InvalidTypeError(Arg),
 
-    DivideByZeroError,
+    AssignedUnassignableValue,
     CalledMainFunction,
     FunctionNotFound,
     CallOutsideFunction,
@@ -47,7 +47,9 @@ impl fmt::Display for TranslitError {
             TranslitError::AssemblyGenerationError(info) => {
                 write!(f, "Error generating assembly: {}", info)
             }
-            TranslitError::DivideByZeroError => write!(f, "Cannot divide by zero."),
+            TranslitError::AssignedUnassignableValue => {
+                write!(f, "Cannot assign this value to a variable")
+            }
             TranslitError::CalledMainFunction => write!(f, "Cannot call main function itself."),
             TranslitError::FunctionNotFound => {
                 write!(f, "Function not found (in call instruction)")

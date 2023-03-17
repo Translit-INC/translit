@@ -1,8 +1,15 @@
-use crate::{FunctionID, Label, Literal, Variable};
+use crate::{FunctionID, Label, Literal, Type, Variable};
 
 /// An instruction in the IR
 #[derive(Debug, Clone)]
 pub struct Instruction(pub(crate) InstructionCode, pub(crate) Vec<Arg>);
+
+/// Info about the just-passed instruction
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct InstructionOuput {
+    pub(crate) memory: Option<usize>,
+    pub(crate) type_: Type,
+}
 
 /// Argument passed to an instruction
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -46,7 +53,7 @@ impl Arg {
         match self {
             Arg::Label(Label(id)) => format!("l{id}"),
             Arg::Function(FunctionID(id)) => format!("f{id}"),
-            Arg::Var(Variable(id)) => format!("v{id}"),
+            Arg::Var(Variable(_, id)) => format!("@{id}"),
             Arg::Literal(Literal(t, a)) => format!("{a}{t:?}"),
         }
     }
@@ -89,7 +96,6 @@ pub enum InstructionCode {
     JMPIF,
     /// return from function
     RET,
-
-    /// variable
-    VAR,
+    /// Push something to memory
+    PUSH,
 }

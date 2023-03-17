@@ -1,20 +1,20 @@
+use crate::InstructionOuput;
+
 /// Type of a literal or variable
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[allow(non_camel_case_types)]
 pub enum Type {
     /// 8-bit integer
-    i8,
+    i8 = 8,
     /// 16-bit integer
-    i16,
+    i16 = 16,
     /// 32-bit integer
-    i32,
+    i32 = 32,
     /// 64-bit integer
-    i64,
-    /// 1-bit boolean (not really)
-    bool,
+    i64 = 64,
     /// None
     #[default]
-    none,
+    none = 0,
 }
 
 /// A literal value
@@ -37,15 +37,30 @@ impl Literal {
     pub fn int64(n: i64) -> Literal {
         Literal(Type::i64, n as _)
     }
-
-    pub fn bool(n: bool) -> Literal {
-        Literal(Type::bool, n as _)
-    }
 }
 
 /// A variable
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Variable(pub(crate) usize); // value returned by instruction at that index
+pub struct Variable(pub(crate) Type, pub(crate) usize); // index of builder.memory
+
+/// Something which can be assigned to a variable
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum VarAssignable {
+    Literal(Literal),
+    InstOut(InstructionOuput),
+}
+
+impl From<Literal> for VarAssignable {
+    fn from(value: Literal) -> Self {
+        VarAssignable::Literal(value)
+    }
+}
+
+impl From<InstructionOuput> for VarAssignable {
+    fn from(value: InstructionOuput) -> Self {
+        VarAssignable::InstOut(value)
+    }
+}
 
 #[derive(Debug, Clone)]
 /// a function
