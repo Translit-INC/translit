@@ -171,6 +171,11 @@ impl IRBuilder {
 
     /// Push an instruction into the IR. Returns an error if a RET instruction is passed outside a function.
     pub fn push(&mut self, code: IC, args: Vec<Arg>) -> TranslitResult<InstructionOuput> {
+        match self.functions.last() {
+            Some(x) if x.end.is_none() => { },
+            _ => return Err(TranslitError::InstructionOutsideFunction)
+        };
+
         let instr = Instruction(code, args);
         let type_ = self.get_type(&instr)?;
         if type_ != Type::none {

@@ -21,6 +21,7 @@ pub enum TranslitError {
     CalledMainFunction,
     FunctionNotFound,
     CallOutsideFunction,
+    InstructionOutsideFunction,
 
     AssemblyGenerationError(AssemblyGenerationError),
 }
@@ -57,6 +58,7 @@ impl fmt::Display for TranslitError {
             TranslitError::CallOutsideFunction => {
                 write!(f, "Tried to call function outside a function")
             }
+            TranslitError::InstructionOutsideFunction => write!(f, "Cannot add instructions outside a function.")
         }
     }
 }
