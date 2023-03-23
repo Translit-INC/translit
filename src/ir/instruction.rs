@@ -96,6 +96,8 @@ pub enum InstructionCode {
     JMPIF,
     /// return from function
     RET,
+    /// Insert a PHI node
+    PHI,
     /// Push something to memory
     PUSH,
 }

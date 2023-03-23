@@ -167,14 +167,31 @@ impl IRBuilder {
             IC::PUSH => {
                 panic!("Not meant for user");
             }
+            IC::PHI => {
+                let mut t = None;
+                for arg in &instr.1 {
+                    if let Arg::Var(Variable(t0, _)) = arg {
+                        if let Some(t) = t {
+                            if t != *t0 {
+                                return Err(TranslitError::InvalidTypeError(*arg));
+                            }
+                        } else {
+                            t = Some(*t0);
+                        }
+                    } else {
+                        return Err(TranslitError::InvalidParamError(*arg));
+                    }
+                }
+                t.ok_or(TranslitError::InstrParamLenError)
+            }
         }
     }
 
     /// Push an instruction into the IR. Returns an error if a RET instruction is passed outside a function.
     pub fn push(&mut self, code: IC, args: Vec<Arg>) -> TranslitResult<InstructionOuput> {
         match self.functions.last() {
-            Some(x) if x.end.is_none() => { },
-            _ => return Err(TranslitError::InstructionOutsideFunction)
+            Some(x) if x.end.is_none() => {}
+            _ => return Err(TranslitError::InstructionOutsideFunction),
         };
 
         let instr = Instruction(code, args);

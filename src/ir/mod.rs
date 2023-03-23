@@ -1,4 +1,4 @@
-use crate::{Arg, Function, FunctionID, Instruction, Label, Literal, Variable, Type};
+use crate::{Arg, Function, FunctionID, Instruction, Label, Literal, Type, Variable};
 
 pub mod builder;
 pub mod instruction;
