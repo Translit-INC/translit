@@ -1,4 +1,4 @@
-use crate::{Arg, Function, FunctionID, Instruction, Label, Literal, Variable};
+use crate::{Arg, Function, FunctionID, Instruction, Label, Literal, Variable, Type};
 
 pub mod builder;
 pub mod instruction;
@@ -9,6 +9,7 @@ pub struct IR {
     pub(crate) instructions: Vec<Instruction>,
     pub(crate) functions: Vec<Function>,
     pub(crate) labels: Vec<Label>,
+    pub(crate) memory: Vec<(usize, Type)>,
 }
 
 impl IR {

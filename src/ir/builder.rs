@@ -32,6 +32,7 @@ impl IRBuilder {
             instructions: self.instructions,
             functions: self.functions,
             labels: self.labels,
+            memory: self.memory,
         })
     }
 
