@@ -9,13 +9,21 @@ pub fn begin_function(idx: usize) -> String {
     format!("func_{idx}:\n")
 }
 
+pub const fn get_size(typ: Type) -> u64 {
+    typ as u64
+}
+
 pub const fn get_register(typ: Type) -> &'static str {
     match typ {
-        Type::i8 => "bpl",
-        Type::i16 => "bp",
-        Type::i32 => "ebp",
-        Type::i64 => "rbp",
+        Type::Byte => "al",
+        Type::Word => "ax",
+        Type::DWord => "eax",
+        Type::QWord => "rax",
 
         _ => unreachable!(),
     }
+}
+
+pub fn get_type_name(typ: Type) -> String {
+    format!("{:?}", typ).to_lowercase()
 }

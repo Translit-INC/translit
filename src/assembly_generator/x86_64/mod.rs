@@ -1,10 +1,20 @@
+//
+// Assembly Insertion Format:
+//     inserted strings may or may not start with a tab character,
+//     inserted strings should be ended with a new line character
+//
+
 mod helper;
+mod variables;
+
 use helper::*;
 
 use crate::{
     Arg::*, AssemblyGenerationError, AssemblyGenerationResult, FunctionID, Instruction,
     InstructionCode::*, IR,
 };
+
+use self::variables::VariableIndex;
 
 pub fn generate_assembly_nasm_x86_64(ir: IR) -> AssemblyGenerationResult<String> {
     let Some(main_func) = ir.functions.last() else {
@@ -33,7 +43,7 @@ pub fn generate_assembly_nasm_x86_64(ir: IR) -> AssemblyGenerationResult<String>
 
     // generated assembly
     Ok(format!(
-        "{data_section}{text_section}{main_function}{EXIT_SYSCALL}",
+        "{data_section}{text_section}{main_function}{0}{EXIT_SYSCALL}", variables::free_all()
     ))
 }
 

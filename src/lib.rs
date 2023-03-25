@@ -24,7 +24,7 @@ mod tests {
     #[test]
     fn gen_ir() -> TranslitResult<()> {
         let mut builder = IRBuilder::new();
-        let mut var = builder.create_var(Type::i8);
+        let mut var = builder.create_var(Type::u8);
         let _main_func = builder.start_function(&Signature::new(&[], Type::none))?;
 
         let output = builder.push(

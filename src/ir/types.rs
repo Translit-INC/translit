@@ -1,17 +1,18 @@
 use crate::InstructionOuput;
 
 /// Type of a literal or variable
+#[repr(u64)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[allow(non_camel_case_types)]
 pub enum Type {
-    /// 8-bit integer
-    i8 = 8,
-    /// 16-bit integer
-    i16 = 16,
-    /// 32-bit integer
-    i32 = 32,
-    /// 64-bit integer
-    i64 = 64,
+    /// 1 byte (8-bit)
+    Byte = 8,
+    /// 2 bytes (16-bit)
+    Word = 16,
+    /// 4 bytes (32-bit)
+    DWord = 32,
+    /// 8 bytes (64-bit)
+    QWord = 64,
     /// None
     #[default]
     none = 0,
@@ -23,19 +24,19 @@ pub struct Literal(pub(crate) Type, pub(crate) u64); // Actual value
 
 impl Literal {
     pub fn int8(n: i8) -> Literal {
-        Literal(Type::i8, n as _)
+        Literal(Type::Byte, n as _)
     }
 
     pub fn int16(n: i16) -> Literal {
-        Literal(Type::i16, n as _)
+        Literal(Type::Word, n as _)
     }
 
     pub fn int32(n: i32) -> Literal {
-        Literal(Type::i32, n as _)
+        Literal(Type::DWord, n as _)
     }
 
     pub fn int64(n: i64) -> Literal {
-        Literal(Type::i64, n as _)
+        Literal(Type::QWord, n as _)
     }
 }
 
