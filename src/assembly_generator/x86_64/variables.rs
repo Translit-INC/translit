@@ -25,7 +25,17 @@ pub fn create_var(write_buffer: &mut String, var_type: Type, value: u64) -> Vari
     *IDX.lock() += 1;
     *STACK_SIZE.lock() += var_size;
 
-    current_idx.into()
+    VariableIndex(var_type, current_idx)
+}
+
+pub fn load_variable(register: &str, var: VariableIndex) -> String {
+    // we wanna get the size of variables pushed after the variable, for that we can do:
+    // stack size then - current stack size
+    let relative_position = *STACK_SIZE.lock() - VAR_MAP.lock().get(&var.into()).unwrap();
+
+    let type_name = helper::get_type_name(var.0);
+
+    format!("\tmov {register}, {type_name} [rsp-{}]\n", relative_position)
 }
 
 /// Must be called at the end of function
@@ -41,16 +51,10 @@ fn create_var_asm(typ: Type, value: u64) -> String {
 }
 
 #[derive(Clone, Copy)]
-pub struct VariableIndex(u64);
+pub struct VariableIndex(Type, u64);
 
 impl From<VariableIndex> for u64 {
     fn from(value: VariableIndex) -> Self {
-        value.0
-    }
-}
-
-impl Into<VariableIndex> for u64 {
-    fn into(self) -> VariableIndex {
-        VariableIndex(self)
+        value.1
     }
 }
