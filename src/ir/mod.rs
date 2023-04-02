@@ -8,8 +8,8 @@ pub mod types;
 pub struct IR {
     pub(crate) instructions: Vec<Instruction>,
     pub(crate) functions: Vec<Function>,
-    pub(crate) labels: Vec<Label>,
-    pub(crate) memory: Vec<(usize, Type)>,
+    pub(crate) labels: Vec<Label>
+    // pub(crate) memory: Vec<(usize, Type)>,
 }
 
 impl IR {

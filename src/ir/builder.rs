@@ -8,7 +8,8 @@ pub struct IRBuilder {
     instructions: Vec<Instruction>,
     functions: Vec<Function>,
     labels: Vec<Label>,
-    /// id and type of intructions in self.instructions
+
+    // id and type of intructions in self.instructions
     memory: Vec<(usize, Type)>,
 }
 
@@ -32,7 +33,7 @@ impl IRBuilder {
             instructions: self.instructions,
             functions: self.functions,
             labels: self.labels,
-            memory: self.memory,
+            memory: self.memory
         })
     }
 
@@ -116,6 +117,21 @@ impl IRBuilder {
             | IC::DIV
             | IC::OR => params_err(2).and_then(|_| same_typed()),
 
+            IC::VAR => params_err(1).and_then(|_| {
+                match *instr.1.as_slice() {
+                    [a @ Arg::Literal(Literal(t, _))] => Ok(t),
+                    _ => Err(TranslitError::InvalidParamError(a))
+                }
+            }),
+
+            IC::SET => todo!(),
+            // IC::SET => params_err(1).and_then(|_| {
+            //     match *instr.1.as_slice() {
+            //         [a @ Arg::Literal(Literal(t, _))] => Ok(t),
+            //         _ => Err(TranslitError::InvalidParamError(a))
+            //     }
+            // }),
+
             IC::NOT => params_err(1).and_then(|_| get_type()),
 
             IC::CALL => params_err(1).and_then(|_| {
@@ -196,49 +212,14 @@ impl IRBuilder {
 
         let instr = Instruction(code, args);
         let type_ = self.get_type(&instr)?;
-        if type_ != Type::none {
-            self.memory.push((self.instructions.len(), type_))
-        }
+        // if type_ != Type::none {
+        //     self.memory.push((self.instructions.len(), type_))
+        // }
         self.instructions.push(instr);
 
         Ok(InstructionOuput {
-            memory: (type_ != Type::none).then_some(self.memory.len() - 1),
-            type_,
+            // memory: (type_ != Type::none).then_some(self.memory.len() - 1),
+            type_
         })
-    }
-
-    pub fn create_var(&mut self, type_: Type) -> Variable {
-        Variable(type_, 0)
-    }
-
-    pub fn set_var(
-        &mut self,
-        var: &mut Variable,
-        assign: impl Into<VarAssignable>,
-    ) -> TranslitResult<()> {
-        match assign.into() {
-            VarAssignable::Literal(l @ Literal(t, _)) => {
-                if var.0 != t {
-                    return Err(TranslitError::InvalidTypeError(Arg::Literal(l)));
-                }
-                self.memory.push((self.instructions.len(), t));
-                self.instructions
-                    .push(Instruction(IC::PUSH, vec![l.into()]));
-                var.1 = self.memory.len() - 1;
-                Ok(())
-            }
-            VarAssignable::InstOut(InstructionOuput { memory, type_ }) => {
-                let Some(memory) = memory else {
-                    return Err(TranslitError::AssignedUnassignableValue);
-                };
-                if var.0 != type_ {
-                    return Err(TranslitError::InvalidTypeError(Arg::Var(Variable(
-                        type_, memory,
-                    ))));
-                }
-                var.1 = memory;
-                Ok(())
-            }
-        }
     }
 }

@@ -7,7 +7,7 @@ pub struct Instruction(pub(crate) InstructionCode, pub(crate) Vec<Arg>);
 /// Info about the just-passed instruction
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InstructionOuput {
-    pub(crate) memory: Option<usize>,
+    // pub(crate) memory: Option<usize>,
     pub(crate) type_: Type,
 }
 
@@ -100,4 +100,8 @@ pub enum InstructionCode {
     PHI,
     /// Push something to memory
     PUSH,
+    /// variable
+    VAR,
+    /// change the value
+    SET
 }
