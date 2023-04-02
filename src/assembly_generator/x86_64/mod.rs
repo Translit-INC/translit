@@ -16,7 +16,7 @@ use crate::{
 
 use self::variables::VariableIndex;
 
-pub fn generate_assembly_nasm_x86_64(ir: IR) -> AssemblyGenerationResult<String> {
+pub fn generate_assembly(ir: IR) -> AssemblyGenerationResult<String> {
     let Some(main_func) = ir.functions.last() else {
         return Err(AssemblyGenerationError::NoMainFunction);
     };
