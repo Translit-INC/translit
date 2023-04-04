@@ -47,7 +47,7 @@ pub fn generate_assembly(ir: IR) -> AssemblyGenerationResult<String> {
     ))
 }
 
-pub fn gen(inst: &Instruction, ir: &IR) -> String {
+fn gen(inst: &Instruction, ir: &IR) -> String {
     match (inst.0, inst.1.as_slice()) {
         (ADD, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 + b.1),
         (SUB, &[Literal(a), Literal(b)]) => format!("\tpush {}\n", a.1 - b.1),
