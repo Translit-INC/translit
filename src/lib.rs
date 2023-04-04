@@ -8,10 +8,10 @@ pub mod ir;
 mod assembly_generator;
 
 pub use assembly_generator::error::{AssemblyGenerationError, AssemblyGenerationResult};
-pub use assembly_generator::{generate_assembly, Architecture};
+pub use assembly_generator::current::generate_assembly;
 pub use error::{TranslitError, TranslitResult};
 pub use ir::builder::IRBuilder;
-pub use ir::instruction::{Arg, Instruction, InstructionCode, InstructionOuput};
+pub use ir::instruction::{Arg, Instruction, InstructionCode};
 pub use ir::types::{
     Function, FunctionID, Label, Literal, Signature, Type, VarAssignable, Variable,
 };
