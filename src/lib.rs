@@ -1,88 +1,31 @@
-#![allow(dead_code)]
-#![allow(unused)]
-#![allow(clippy::new_without_default)]
-
-pub mod error;
+// Main modules
 pub mod ir;
+pub mod assembly_generator;
+pub mod error;
 
-mod assembly_generator;
+// TODO: Core Translation Interface
+// - Define the main TranslationContext struct
+// - Implement configuration options
+// - Add error handling types
 
-pub use assembly_generator::error::{AssemblyGenerationError, AssemblyGenerationResult};
-pub use assembly_generator::current::generate_assembly;
-pub use error::{TranslitError, TranslitResult};
-pub use ir::builder::IRBuilder;
-pub use ir::instruction::{Arg, Instruction, InstructionCode};
-pub use ir::types::{
-    Function, FunctionID, Label, Literal, Signature, Type, VarAssignable, Variable,
-};
-pub use ir::IR;
+// TODO: Intermediate Representation (IR)
+// - Define IR structures and types
+// - Implement IR validation
+// - Add IR optimization passes
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// TODO: Assembly Generation
+// - Implement target architecture traits
+// - Add platform-specific optimizations
+// - Support multiple assembly formats
 
-    #[test]
-    fn gen_ir() -> TranslitResult<()> {
-        let mut builder = IRBuilder::new();
-        let mut var = builder.create_var(Type::u8);
-        let _main_func = builder.start_function(&Signature::new(&[], Type::none))?;
+// TODO: Public API
+// - Create builder pattern interface
+// - Add translation pipeline
+// - Implement progress tracking
+// - Add debugging utilities
 
-        let output = builder.push(
-            InstructionCode::ADD,
-            vec![Literal::int8(1).into(), Literal::int8(2).into()],
-        )?;
-
-        builder.set_var(&mut var, output)?;
-        builder.set_var(&mut var, Literal::int8(4))?;
-
-        builder.push(
-            InstructionCode::SUB,
-            vec![Literal::int8(3).into(), var.into()],
-        )?;
-
-        builder.end_function()?;
-
-        let ir = builder.build()?;
-        ir.print();
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_interpreter() -> TranslitResult<()> {
-        let mut builder = IRBuilder::new();
-        let _test_func = builder.start_function(&Signature::new(&[], Type::none))?;
-
-        builder.push(
-            InstructionCode::MUL,
-            vec![Literal::int8(6).into(), Literal::int8(9).into()],
-        )?;
-
-        builder.push(
-            InstructionCode::ADD,
-            vec![Literal::int8(6).into(), Literal::int8(9).into()],
-        )?;
-
-        builder.end_function()?;
-
-        let _main_func = builder.start_function(&Signature::new(&[], Type::none))?;
-
-        builder.push(
-            InstructionCode::ADD,
-            vec![Literal::int8(1).into(), Literal::int8(2).into()],
-        )?;
-
-        builder.push(
-            InstructionCode::SUB,
-            vec![Literal::int8(3).into(), Literal::int8(1).into()],
-        )?;
-
-        builder.push(InstructionCode::CALL, vec![Arg::Function(_test_func)])?;
-        builder.end_function()?;
-
-        let ir = builder.build()?;
-        let asm = generate_assembly(Architecture::x86_64, ir)?;
-        println!("asm: {}", asm);
-        Ok(())
-    }
-}
+// TODO: Testing & Documentation
+// - Add unit tests for each module
+// - Write integration tests
+// - Document public API
+// - Add usage examples
